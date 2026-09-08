@@ -1,0 +1,487 @@
+/* =================================== 
+    Configurações globais
+====================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* =================================== 
+    Variáveis de cores
+====================================== */
+
+:root {
+    --persouz-color: #8b5cf6;
+    --persouz-secondary: #c084fc;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --bg-color: #020817;
+    --bg-gradient: #111827;
+    --border-color: #1f2937;
+    --block-bg: #0f172a;
+    --card-bg: #111827;
+    --nav-btn-bg: #1e293b;
+    --nav-btn-hover: #334155;
+    --income-color: #34d399;
+    --expense-color: #f87171;
+    --delete-color: #ef4444;
+    --delete-color-soft: #fca5a5;
+    --delete-bg: rgba(239, 68, 68, 0.08);
+    --delete-bg-hover: rgba(239, 68, 68, 0.18);
+    --delete-ring: rgba(239, 68, 68, 0.22);
+    --input-bg: #0b1220;
+    --shadow-soft: rgba(15, 23, 42, 0.8);
+}
+
+.income {
+    color: var(--income-color);
+}
+
+.expense {
+    color: var(--expense-color);
+}
+
+/* =================================== 
+    Corpo
+====================================== */
+
+body {
+    color: var(--text-primary);
+    background-color: var(--bg-color);
+    min-height: 100vh;
+}
+
+.login-body {
+    background: radial-gradient(
+        circle at top,
+        rgba(139, 92, 246, 0.35),
+        transparent 35%
+    ),
+    linear-gradient(
+        135deg,
+        var(--bg-gradient) 0%,
+        #0f172a 50%,
+        #090d1a 100%
+    );
+}
+
+/* =================================== 
+    Cabeçalho
+====================================== */
+
+.header {
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--block-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.login-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    margin: 1rem;
+}
+
+.slogan {
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    color: white;
+}
+
+/* =================================== 
+    Barra de navegação
+====================================== */
+
+.nav ul {
+    display: flex;
+    list-style: none;
+    gap: 1.3rem;
+}
+
+.nav ul a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background-color: var(--nav-btn-bg);
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.nav ul a.active,
+.nav ul a:hover {
+    color: var(--text-primary);
+    background-color: var(--nav-btn-hover);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    font-weight: 400;
+    font-size: 0.9rem;
+}
+
+.user-name {
+    color: var(--persouz-secondary);
+    font-weight: bold;
+}
+
+/* =================================== 
+    Botão (Sair)
+====================================== */
+
+.logout {
+    margin-left: 1rem;
+    padding: 0.4rem 0.8rem;
+    background-color: var(--nav-btn-bg);
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.logout:hover {
+    color: var(--text-primary);
+    background-color: var(--nav-btn-hover);
+}
+
+/* =================================== 
+    Container
+====================================== */
+
+.container, .login-container {
+    width: 90%;
+    margin: 1.3rem auto;
+}
+
+.container {
+    max-width: 70rem;
+}
+
+.login-container {
+    max-width: 28rem;
+}
+
+/* =================================== 
+    Cards (Saldo, Receitas, Despesas) 
+====================================== */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.3rem;
+    margin: 1.3rem 0 1.3rem;
+}
+
+.card {
+    text-align: center;
+    padding: 1.5rem 1.3rem;
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+}
+
+.card-header {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.card-value {
+    margin-top: 1rem;
+    font-size: 1.7rem;
+    font-weight: 800;
+}
+
+#balance-card {
+    background: linear-gradient(135deg, var(--persouz-color) 0%, var(--persouz-secondary) 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 16px 30px rgba(133, 55, 206, 0.30);
+}
+
+#balance-card .card-header {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+#balance-card .card-value {
+    color: white;
+}
+
+/* =================================== 
+    Conteúdo principal
+====================================== */
+
+.sr-only { /* Screen Readers Only */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.3rem;
+}
+
+.content-block {
+    background-color: var(--block-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 1.3rem;
+    min-width: 0;
+}
+
+.content-block h1,
+.content-block h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1.3em;
+    color: var(--text-primary);
+}
+
+.login-container h1 {
+    text-align: center;
+}
+
+.login-container .content-block {
+    background-color: rgba(15, 23, 42, 0.92);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* =================================== 
+    Tabela de transações
+====================================== */
+
+#transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow-x: auto;
+}
+
+#transactions-table th,
+#transactions-table td {
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.8rem 0.6rem;
+    text-align: left;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    text-align: center;
+}
+
+#transactions-table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+#table-container {
+    overflow-x: auto;
+}
+
+.table-message {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%);
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    margin: 2rem 0;
+    letter-spacing: 0.5px;
+}
+
+/* =================================== 
+    Formulário (Adicionar Transação)
+====================================== */
+
+.form-group label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    display: block;
+    width: 100%;
+    margin: 0.6rem 0 0.9rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--persouz-color);
+    background-color: rgba(15, 23, 42, 0.9);
+    color: var(--text-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+}
+
+/* =================================== 
+    Botões
+====================================== */
+
+.btn-primary {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--persouz-color) 0%, var(--persouz-secondary) 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.9rem;
+    margin-top: 0.6rem;
+    cursor: pointer;
+    transition: filter 0.4s ease, color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 4px 12px rgba(120, 58, 237, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.4rem;
+    min-height: 2.4rem;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    border-radius: 10px;
+    background: var(--delete-bg);
+    color: var(--delete-color-soft);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease,
+        box-shadow 0.25s ease, transform 0.25s ease, filter 0.25s ease;
+}
+
+.btn-delete:hover {
+    background: var(--delete-bg-hover);
+    border-color: rgba(239, 68, 68, 0.8);
+    color: #fecaca;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+}
+
+.btn-delete:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--delete-ring);
+}
+
+.btn-delete:active {
+    transform: translateY(0);
+    filter: brightness(0.96);
+}
+
+/* =================================== 
+    Rodapé
+====================================== */
+
+.footer {
+    position: relative;
+    top: 0;
+    padding: 1.3rem;
+    background-color: var(--block-bg);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.18);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.auth-footer {
+    margin-top: 1.3rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.auth-footer a {
+    text-decoration: none;
+    font-weight: bold;
+    color: var(--persouz-color);
+    transition: color 0.4s ease;
+}
+
+.auth-footer a:hover {
+    color: var(--persouz-secondary);
+}
+
+/* =================================== 
+    Media Queries (Responsividade)
+====================================== */
+
+@media (max-width: 768px) {
+    .container, .login-container {
+        width: 90%;
+    }
+
+    .content-block {
+        padding: 1rem;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.8rem;
+    }
+
+    .user-info {
+        margin-top: 0.5rem;
+    }
+
+    .dashboard-content {
+        grid-template-columns: 1fr;
+    }
+}
