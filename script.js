@@ -1,3 +1,7 @@
+/* =================================== 
+    Variáveis
+====================================== */
+
 // Cards de saldo, receitas e despesas
 const balanceCard = document.querySelector('#balance-card .card-value');
 const incomeCard = document.querySelector('#income-card .card-value');
@@ -31,6 +35,10 @@ tableContainer.append(tableMessage);
 
 // Armazena as transações salvas no LocalStorage
 let transactions = JSON.parse(localStorage.getItem('persouz_transactions')) || [];
+
+/* =================================== 
+    Funções
+====================================== */
 
 // Formata uma data para o padrão brasileiro (DD/MM/YYYY)
 function formatDate(dateString) {
@@ -70,6 +78,7 @@ function updateTransactions() {
         const valueCell = document.createElement('td');
         const actionCell = document.createElement('td');
         const deleteButton = document.createElement('button');
+        const trashIcon = document.createElement('i');
 
         dateCell.textContent = formatDate(transaction.date);
         descriptionCell.textContent = transaction.description;
@@ -79,8 +88,9 @@ function updateTransactions() {
         valueCell.style.fontWeight = 'bold';
         deleteButton.type = 'button';
         deleteButton.className = 'btn-delete';
-        deleteButton.textContent = 'X';
         deleteButton.onclick = () => deleteTransaction(transaction.id);
+        trashIcon.className = 'fa-solid fa-trash-can';
+        deleteButton.append(trashIcon);
         actionCell.append(deleteButton);
         row.append(dateCell, descriptionCell, categoryCell, valueCell, actionCell);
         tableBody.appendChild(row);
@@ -129,13 +139,35 @@ function saveLocalStorage() {
     localStorage.setItem('persouz_transactions', JSON.stringify(transactions));
 }
 
-// Deleta a transação pelo ID após clicar no X
+// Deleta a transação pelo ID após clicar no botão de apagar
 function deleteTransaction(id) {
     transactions = transactions.filter(transaction => transaction.id !== id);
     saveLocalStorage();
     updateTransactions();
     updateCards();
 }
+
+// Ativa a interatividade do menu mobile
+function setupMobileMenu() {
+    const btnMenu = document.querySelector('.btn-menu');
+    const nav = document.querySelector('.nav');
+
+    if (btnMenu && nav) {
+        btnMenu.addEventListener('click', () => {
+            nav.classList.toggle('active');
+
+            const icon = btnMenu.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-xmark');
+            }
+        });
+    }
+}
+
+/* =================================== 
+    Eventos
+====================================== */
 
 // Adiciona uma nova transação quando o usuário clica no botão "Adicionar"
 transactionForm.addEventListener('submit', (event) => {
@@ -158,11 +190,33 @@ transactionForm.addEventListener('submit', (event) => {
     saveLocalStorage();
 });
 
+// Fecha o menu mobile ao clicar fora do cabeçalho
+document.addEventListener('click', (event) => {
+    const header = document.querySelector('.header');
+    const nav = document.querySelector('.nav');
+    const btnMenuIcon = document.querySelector('.btn-menu i');
+
+    if (header && nav && !header.contains(event.target)) {
+        if (nav.classList.contains('active')) {
+            nav.classList.remove('active');
+            if (btnMenuIcon) {
+                btnMenuIcon.classList.add('fa-bars');
+                btnMenuIcon.classList.remove('fa-xmark');
+            }
+        }
+    }
+});
+
+/* =================================== 
+    Inicialização
+====================================== */
+
 // Executado quando a página abre pela primeira vez para carregar os dados
 function init() {
     updateTransactions();
     updateCards();
     updateCategorySelect();
+    setupMobileMenu();
 }
 
 // Executa a inicialização
