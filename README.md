@@ -57,10 +57,11 @@ O projeto está passando por uma rearquitetura para se tornar uma aplicação Fu
 ```text
 persouz-finance/
 ├── img/
-│   └── persouz-icon.png
-│   ├── persouz-logo-2.png
 │   ├── persouz-logo.png
 ├── index.html
+├── login.html
+├── register.html
+├── transactions.html
 ├── style.css
 ├── script.js
 └── README.md

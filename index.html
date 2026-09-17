@@ -3,155 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persouz Finance - Visão Geral</title>
+
+    <!-- Meta tags para SEO e Compartilhamento (Open Graph) -->
     <meta property="og:title" content="Persouz Finance">
     <meta property="og:description" content="Controle suas finanças de forma simples e inteligente.">
     <meta property="og:image" content="https://andreisouzasp.github.io/persouz-finance/img/persouz-logo.png">
-    <title>Persouz Finance - Visão Geral</title>
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="600">
+
+    <!-- Estilos e Fontes -->
     <link rel="stylesheet" href="style.css">
-    <!-- Font Awesome (CDN) para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="icon" type="image/png" href="img/persouz-logo.png">
+
+    <!-- Scripts (Defer para carregar após o HTML) -->
     <script src="script.js" defer></script>
 </head>
 <body>
+    <!-- Cabeçalho Principal -->
     <header class="header">
-        <div class="mobile-menu">
-            <button type="button" class="btn-menu"><i class="fa-solid fa-bars"></i></button>
+        <div class="compact-menu">
+            <button type="button" class="btn-menu" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
         </div>
 
-        <a href="#" class="logo" aria-label="Persouz Finance - Página Inicial">
-            <img src="img/persouz-logo.png" class="logo-icon" alt="">
+        <a href="index.html" class="logo" aria-label="Persouz Finance - Página Inicial">
+            <img src="img/persouz-logo.png" class="logo-icon" alt="Logo da Persouz Finance">
             <span class="logo-text">Persouz <span class="logo-highlight">Finance</span></span>
         </a>
 
+        <!-- Menu de Navegação -->
         <nav class="nav" aria-label="Navegação Principal">
             <ul>
-                <li><a href="#" class="active" aria-current="page"><i class="fa-solid fa-chart-pie"></i> Visão Geral</a></li>
-                <li><a href="#"><i class="fa-solid fa-tags"></i> Categorias</a></li>
-                <li><a href="#"><i class="fa-solid fa-chart-column"></i> Relatórios</a></li>
+                <li><a href="index.html" class="active" aria-current="page"><i class="fa-solid fa-chart-pie"></i> Visão Geral</a></li>
+                <li><a href="transactions.html"><i class="fa-solid fa-money-bill-transfer"></i> Transações</a></li>
+                <li><a href="categories.html"><i class="fa-solid fa-tags"></i> Categorias</a></li>
             </ul>
         </nav>
 
+        <!-- Informações do Usuário -->
         <div class="user-info">
             <div class="user-icon"><i class="fa-solid fa-user"></i></div>
-            <p>Olá, <span class="user-name">Andrei</span>!</p>
+            <span>Olá, <span class="user-name">Andrei</span>!</span>
         </div>
     </header>
 
+    <!-- Conteúdo Principal -->
     <main class="container">
         <h1 class="sr-only">Painel da Persouz Finance</h1>
 
-        <section class="cards">
-            <h2 class="sr-only">Resumo Financeiro</h2>
-
+        <!-- Seção: Resumo Financeiro (Cards) -->
+        <section class="cards" aria-label="Resumo Financeiro">
             <article id="balance-card" class="card">
-                <h3 class="card-header">Saldo Atual</h3>
+                <h2 class="card-header">Saldo Atual</h2>
                 <p class="card-value">R$ 0,00</p>
             </article>
+            
             <article id="income-card" class="card">
-                <h3 class="card-header">Receitas</h3>
-                <p class="card-value income">+ R$ 0,00</p>
+                <h2 class="card-header">Receitas</h2>
+                <p class="card-value txt-income">+ R$ 0,00</p>
             </article>
+            
             <article id="expense-card" class="card">
-                <h3 class="card-header">Despesas</h3>
-                <p class="card-value expense">- R$ 0,00</p>
+                <h2 class="card-header">Despesas</h2>
+                <p class="card-value txt-expense">- R$ 0,00</p>
             </article>
         </section>
 
-        <div class="dashboard-content">
-            <section class="content-block">
-                <h2>Transações</h2>
+        <!-- Seção: Últimas Transações -->
+        <section class="content-block">
+            <article class="dashboard-transactions-header">
+                <h2>Últimas Transações</h2>
+                <a href="transactions.html">
+                    <button type="button" class="btn-primary btn-show-all">
+                        <i class="fa-solid fa-list"></i> Ver todas as transações
+                    </button>
+                </a>
+            </article>
 
-                <div id="transactions-container">
-                    <table id="transactions-table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Data</th>
-                                <th scope="col">Descrição</th>
-                                <th scope="col">Categoria</th>
-                                <th scope="col">Valor</th>
-                                <th scope="col">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="content-block">
-                <h2>Adicionar Transação</h2>
-
-                <form id="transactions-form">
-                    <div class="form-group">
-                        <label for="type">Tipo</label>
-                        <select id="type" name="type">
-                            <option value="expense">Despesa</option>
-                            <option value="income">Receita</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Descrição</label>
-                        <input type="text" id="description" name="description" placeholder="Digite uma descrição" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="category">Categoria</label>
-                        <select id="category" name="category" required>
-                            <option value="" disabled selected>Selecione uma categoria...</option>
-                            
-                            <optgroup id="expense-group" label="Despesas">
-                                <option value="Alimentação">🍽️ Alimentação</option>
-                                <option value="Assinaturas">🔔 Assinaturas</option>
-                                <option value="Casa">🏡 Casa</option>
-                                <option value="Compras">🛒 Compras</option>
-                                <option value="Dívidas">⚠️ Dívidas</option>
-                                <option value="Educação">🎓 Educação</option>
-                                <option value="Empresarial">💼 Empresarial</option>
-                                <option value="Investimento">📈 Investimento</option>
-                                <option value="Lazer">🏖️ Lazer</option>
-                                <option value="Pessoal">👤 Pessoal</option>
-                                <option value="Pet">🐾 Pet</option>
-                                <option value="Saúde">🏥 Saúde</option>
-                                <option value="Serviços">🛠️ Serviços</option>
-                                <option value="Taxas">💸 Taxas</option>
-                                <option value="Transferências">↔️ Transferências</option>
-                                <option value="Transporte">🚗 Transporte</option>
-                                <option value="Vestuário">👖 Vestuário</option>
-                                <option value="Viagem">✈️ Viagem</option>
-                                <option value="Outros">❓ Outros</option>
-                            </optgroup>
-
-                            <optgroup id="income-group" label="Receitas">
-                                <option value="Cashback">🔄 Cashback</option>
-                                <option value="Fatura">🧾 Fatura</option>
-                                <option value="Presente">🎁 Presente</option>
-                                <option value="Prêmio">🏆 Prêmio</option>
-                                <option value="Receitas variáveis">💵 Receitas variáveis</option>
-                                <option value="Renda extra">💰 Renda extra</option>
-                                <option value="Salário">💳 Salário</option>
-                                <option value="Transferências">↔️ Transferências</option>
-                                <option value="Outros">❓ Outros</option>
-                            </optgroup>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="date">Data</label>
-                        <input type="date" id="date" name="date" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="value">Valor (R$)</label>
-                        <input type="number" id="value" name="value" step="0.01" min="0.01" inputmode="decimal" placeholder="0,00" required>
-                    </div>
-
-                    <button type="submit" class="btn-primary">Adicionar</button>
-                </form>
-            </section>
-        </div>
+            <article class="transactions-list" id="dashboard-transactions">
+                <ul></ul> <!-- Lista vazia para as transações -->
+            </article>
+        </section>
     </main>
 
+    <!-- Rodapé -->
     <footer class="footer">
         <small>Persouz Finance &copy; 2026 | Todos os direitos reservados.</small>
     </footer>

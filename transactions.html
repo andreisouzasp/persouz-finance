@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persouz Finance - Transações</title>
+
+    <!-- Meta tags para SEO e Compartilhamento (Open Graph) -->
+    <meta property="og:title" content="Persouz Finance">
+    <meta property="og:description" content="Controle suas finanças de forma simples e inteligente.">
+    <meta property="og:image" content="https://andreisouzasp.github.io/persouz-finance/img/persouz-logo.png">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="600">
+
+    <!-- Estilos e Fontes -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="icon" type="image/png" href="img/persouz-logo.png">
+
+    <!-- Scripts (Defer para carregar após o HTML) -->
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <!-- Cabeçalho Principal -->
+    <header class="header">
+        <div class="compact-menu">
+            <button type="button" class="btn-menu" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
+        </div>
+
+        <a href="index.html" class="logo" aria-label="Persouz Finance - Página Inicial">
+            <img src="img/persouz-logo.png" class="logo-icon" alt="Logo da Persouz Finance">
+            <span class="logo-text">Persouz <span class="logo-highlight">Finance</span></span>
+        </a>
+
+        <!-- Menu de Navegação -->
+        <nav class="nav" aria-label="Navegação Principal">
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-chart-pie"></i> Visão Geral</a></li>
+                <li><a href="transactions.html" class="active" aria-current="page"><i class="fa-solid fa-money-bill-transfer"></i> Transações</a></li>
+                <li><a href="categories.html"><i class="fa-solid fa-tags"></i> Categorias</a></li>
+            </ul>
+        </nav>
+
+        <!-- Informações do Usuário -->
+        <div class="user-info">
+            <div class="user-icon"><i class="fa-solid fa-user"></i></div>
+            <p>Olá, <span class="user-name">Andrei</span>!</p>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="container">
+        <h1 class="sr-only">Histórico de Transações</h1>
+
+        <div class="page-actions-header">
+            <div class="filter-type">
+                <button type="button" class="btn-type active">Todos</button>
+                <button type="button" class="btn-type">Receitas</button>
+                <button type="button" class="btn-type">Despesas</button>
+            </div>
+
+            <div class="search-block">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" placeholder="Pesquisar" class="search-input"></input>
+            </div>
+
+            <button type="button" id="open-modal-btn" class="btn-primary btn-add-transaction">
+                <i class="fa-solid fa-plus"></i> Adicionar
+            </button>
+        </div>
+
+        <section class="content-block">
+            <article class="transactions-list" id="full-transactions">
+                <ul></ul> <!-- Lista vazia para as transações -->
+            </article>
+        </section>
+    </main>
+
+    <!-- Estrutura do Modal (Oculto por padrão) -->
+    <div id="transaction-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adicionar Transação</h3>
+                <button type="button" id="close-modal-btn" class="modal-close" aria-label="Fechar modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="transaction-form">
+                <div class="form-group">
+                    <label for="desc">Descrição</label>
+                    <input type="text" id="desc" name="desc" placeholder="Ex: Supermercado, Aluguel..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Valor (R$)</label>
+                    <input type="number" step="0.01" id="amount" name="amount" placeholder="0,00" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="type">Tipo</label>
+                    <select id="type" name="type" required>
+                        <option value="expense" selected>Despesa</option>
+                        <option value="income">Receita</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Categoria</label>
+                    <select name="category" id="category" required></select> <!-- Select vazio para as categorias -->
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Data</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <button type="submit" class="btn-primary">Salvar Transação</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <footer class="footer">
+        <small>Persouz Finance &copy; 2026 | Todos os direitos reservados.</small>
+    </footer>
+</body>
+</html>

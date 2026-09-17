@@ -3,28 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persouz Finance - Login</title>
+
+    <!-- Meta tags para SEO e Compartilhamento (Open Graph) -->
     <meta property="og:title" content="Persouz Finance">
     <meta property="og:description" content="Controle suas finanças de forma simples e inteligente.">
     <meta property="og:image" content="https://andreisouzasp.github.io/persouz-finance/img/persouz-logo.png">
-    <title>Persouz Finance - Login</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="600">
+
+    <!-- Estilos e Fontes -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="icon" type="image/png" href="img/persouz-logo.png">
+
+    <!-- Scripts (Defer para carregar após o HTML) -->
+    <script src="script.js" defer></script>
 </head>
 <body class="auth-body">
+    <!-- Cabeçalho -->
     <header class="auth-header">
         <a href="index.html" class="logo" aria-label="Persouz Finance - Página Inicial">
-            <img src="img/persouz-logo.png" class="logo-icon" alt="">
+            <img src="img/persouz-logo.png" class="logo-icon" alt="Logo da Persouz Finance">
             <span class="logo-text">Persouz <span class="logo-highlight">Finance</span></span>
         </a>
-
-        <p class="slogan">Controle suas finanças de forma simples e inteligente.</p>
+        <h1 class="slogan">Controle suas finanças de forma simples e inteligente.</h1>
     </header>
 
+    <!-- Formulário -->
     <main class="auth-container">
         <section class="content-block">
-            <h1>Entrar</h1>
+            <h2>Entrar</h2>
 
-            <form id="auth-form">
+            <form id="auth-form" action="#" method="POST">
                 <div class="form-group">
                     <label for="username">Usuário</label>
                     <input type="text" id="username" name="username" autocomplete="username" placeholder="Seu nome de usuário" required>
@@ -37,9 +48,9 @@
 
                 <button type="submit" class="btn-primary">Fazer login</button>
             </form>
-
+            
             <div class="auth-footer">
-                <p>Não possui uma conta? <a href="register">Criar conta</a></p>
+                <span>Não possui uma conta? <a href="register.html">Criar conta</a></span>
             </div>
         </section>
     </main>

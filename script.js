@@ -1,145 +1,280 @@
-/* =================================== 
-    Variáveis
-====================================== */
+/* ==========================================================================
+   PERSOUZ FINANCE - SUMÁRIO (TABLE OF CONTENTS)
+   ==========================================================================
+   1. Variáveis Globais e Seletores
+   2. Renderização do DOM
+   3. Operações de Adição, Edição e Exclusão
+   4. Componentes Interativos (Menu e Modal)
+   5. Formatadores
+   6. Inicialização
+   ========================================================================== */
 
-// Cards de saldo, receitas e despesas
+/* ==========================================================================
+   1. Variáveis Globais e Seletores
+   ========================================================================== */
 const balanceCard = document.querySelector('#balance-card .card-value');
 const incomeCard = document.querySelector('#income-card .card-value');
 const expenseCard = document.querySelector('#expense-card .card-value');
-
-// Formulário de adicionar transação
-const transactionForm = document.querySelector('#transactions-form');
-
-// Campos do formulário
-const descriptionInput = document.querySelector('#description');
-const dateInput = document.querySelector('#date');
-const categorySelect = document.querySelector('#category');
-const valueInput = document.querySelector('#value');
+const dashboardTransactions = document.querySelector('#dashboard-transactions ul');
+const fullTransactions = document.querySelector('#full-transactions ul');
+const modalOverlay = document.querySelector('#transaction-modal');
+const modalTitle = document.querySelector('.modal-header h3');
+const transactionForm = document.querySelector('#transaction-form');
+const descriptionInput = document.querySelector('#desc');
+const valueInput = document.querySelector('#amount');
 const typeSelect = document.querySelector('#type');
-
-// Grupos de categorias
-const incomeGroup = document.querySelector('#income-group');
-const expenseGroup = document.querySelector('#expense-group');
-
-// Tabela de transações
-const transactionsTable = document.querySelector('#transactions-table');
-const tableContainer = document.querySelector('#transactions-container');
-const tableBody = document.querySelector('#transactions-table tbody');
-
-// Cria uma mensagem para exibir caso não tenha transações na tabela
-const tableMessage = document.createElement('div');
-tableMessage.className = 'table-message';
-tableMessage.textContent = 'Nenhuma transação adicionada ainda.';
-tableMessage.style.display = 'none';
-tableContainer.append(tableMessage);
+const categorySelect = document.querySelector('#category');
+const dateInput = document.querySelector('#date');
 
 // Armazena as transações salvas no LocalStorage
 let transactions = JSON.parse(localStorage.getItem('persouz_transactions')) || [];
 
-/* =================================== 
-    Funções
-====================================== */
+// Lista de categorias disponíveis para classificação das transações
+let categories = [
+    // Despesas
+    {name: 'Alimentação', type: 'expense', icon: 'fa-utensils'},
+    {name: 'Assinaturas', type: 'expense', icon: 'fa-file-invoice-dollar'},
+    {name: 'Casa', type: 'expense', icon: 'fa-house'},
+    {name: 'Compras', type: 'expense', icon: 'fa-cart-shopping'},
+    {name: 'Dívidas', type: 'expense', icon: 'fa-hand-holding-dollar'},
+    {name: 'Educação', type: 'expense', icon: 'fa-book-open'},
+    {name: 'Empresarial', type: 'expense', icon: 'fa-briefcase'},
+    {name: 'Investimento', type: 'expense', icon: 'fa-chart-line'},
+    {name: 'Lazer', type: 'expense', icon: 'fa-gamepad'},
+    {name: 'Pessoal', type: 'expense', icon: 'fa-user'},
+    {name: 'Pet', type: 'expense', icon: 'fa-paw'},
+    {name: 'Saúde', type: 'expense', icon: 'fa-heart-pulse'},
+    {name: 'Serviços', type: 'expense', icon: 'fa-screwdriver-wrench'},
+    {name: 'Taxas', type: 'expense', icon: 'fa-percent'},
+    {name: 'Transferências', type: 'expense', icon: 'fa-right-left'},
+    {name: 'Transporte', type: 'expense', icon: 'fa-bus'},
+    {name: 'Vestuário', type: 'expense', icon: 'fa-shirt'},
+    {name: 'Viagem', type: 'expense', icon: 'fa-plane'},
 
-// Formata uma data para o padrão brasileiro (DD/MM/YYYY)
-function formatDate(dateString) {
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
-}
+    // Receitas
+    {name: 'Cashback', type: 'income', icon: 'fa-money-bill-wave'},
+    {name: 'Fatura', type: 'income', icon: 'fa-file-invoice-dollar'},
+    {name: 'Presente', type: 'income', icon: 'fa-gift'},
+    {name: 'Prêmio', type: 'income', icon: 'fa-trophy'},
+    {name: 'Receitas variáveis', type: 'income', icon: 'fa-wallet'},
+    {name: 'Renda extra', type: 'income', icon: 'fa-briefcase'},
+    {name: 'Salário', type: 'income', icon: 'fa-sack-dollar'},
+    {name: 'Transferências', type: 'income', icon: 'fa-right-left'},
+    {name: 'Outros', type: 'income', icon: 'fa-ellipsis'}
+];
 
-// Formato um número para o padrão monetário real (ex: 1000 -> "R$ 1.000,00")
-function formatCurrency(amount) {
-    return amount.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    });
-}
+// Guarda o ID da transação em edição
+let editingTransactionId = null;
 
-// Atualiza a tabela de transações
+/* ==========================================================================
+   2. Renderização do DOM
+   ========================================================================== */
 function updateTransactions() {
-    // Limpa o conteúdo da tabela
-    tableBody.innerHTML = '';
+    const targetContainer = fullTransactions || dashboardTransactions;
+    if(!targetContainer) return;
 
-    // Cria um array com as transações ordenadas por data
-    const orderedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+    targetContainer.innerHTML = '';
 
-    // Contabiliza o total de transações
-    let totalTransactions = 0;
+    let orderedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Cria a linha da tabela com as informações
-    orderedTransactions.forEach((transaction) => {
-        const row = document.createElement('tr');
+    // Na página principal, mostra apenas as 10 últimas
+    if(dashboardTransactions) {
+        orderedTransactions = orderedTransactions.slice(0, 10);
+    }
+
+    if(orderedTransactions.length === 0) {
+        targetContainer.innerHTML = `
+            <li class="empty-list-item">
+                <i class="fa-solid fa-receipt"></i>
+                <p>Nenhuma transação encontrada</p>
+            </li>
+        `;
+        return;
+    }
+
+    orderedTransactions.forEach(transaction => {
+        const row = document.createElement('li');
         const isIncome = transaction.type === 'income';
         const typeClass = isIncome ? 'income' : 'expense';
         const sign = isIncome ? '+' : '-';
 
-        const dateCell = document.createElement('td');
-        const descriptionCell = document.createElement('td');
-        const categoryCell = document.createElement('td');
-        const valueCell = document.createElement('td');
-        const actionCell = document.createElement('td');
-        const deleteButton = document.createElement('button');
-        const trashIcon = document.createElement('i');
+        // Data
+        const dateIcon = document.createElement('i');
+        const dateCell = document.createElement('div');
+        dateIcon.className = 'fa-solid fa-calendar';
+        dateCell.className = 'transaction-date';
+        dateCell.append(dateIcon, document.createTextNode(` ${formatDate(transaction.date)}`));
 
-        dateCell.textContent = formatDate(transaction.date);
+        // Categoria
+        const categoryIcon = document.createElement('i');
+        const categoryCell = document.createElement('div');
+        const matchedCategory = categories.find(cat => cat.name === transaction.category);
+        const iconClass = matchedCategory ? matchedCategory.icon : 'fa-tag';
+        categoryIcon.className = `fa-solid ${iconClass}`;
+        categoryCell.className = 'transaction-category';
+        categoryCell.append(categoryIcon, document.createTextNode(` ${transaction.category}`));
+
+        // Badge Tipo
+        const typeIcon = document.createElement('i');
+        const typeCell = document.createElement('div');
+        typeIcon.className = `fa-solid fa-arrow-${isIncome ? 'up' : 'down'}`;
+        typeCell.className = `badge badge-${typeClass}`;        
+        typeCell.append(typeIcon, document.createTextNode(` ${isIncome ? 'Receita' : 'Despesa'}`));
+
+        // Descrição
+        const descriptionCell = document.createElement('div');
+        descriptionCell.className = 'transaction-description';
         descriptionCell.textContent = transaction.description;
-        categoryCell.textContent = transaction.category;
-        valueCell.textContent = `${sign} ${formatCurrency(transaction.value)}`;
-        valueCell.className = typeClass;
-        valueCell.style.fontWeight = 'bold';
-        deleteButton.type = 'button';
-        deleteButton.className = 'btn-delete';
-        deleteButton.onclick = () => deleteTransaction(transaction.id);
-        trashIcon.className = 'fa-solid fa-trash-can';
-        deleteButton.append(trashIcon);
-        actionCell.append(deleteButton);
-        row.append(dateCell, descriptionCell, categoryCell, valueCell, actionCell);
-        tableBody.appendChild(row);
-        totalTransactions++;
-    });
 
-    // Exibe a mensagem caso não haja transações
-    if (totalTransactions) {
-        transactionsTable.style.display = 'table';
-        tableMessage.style.display = 'none';
-    } else {
-        transactionsTable.style.display = 'none';
-        tableMessage.style.display = 'block';
-    }
+        // Valor
+        const valueCell = document.createElement('div');
+        valueCell.className = `transaction-value txt-${typeClass}`;
+        valueCell.textContent = `${sign} ${formatCurrency(transaction.value)}`;
+
+        row.append(dateCell, categoryCell, typeCell, descriptionCell, valueCell);
+
+        // Ações de Editar e Excluir na página completa (transactions.html)
+        if(fullTransactions) {
+            row.className = 'transaction-item with-actions';
+
+            // Botão Editar
+            const editIcon = document.createElement('i');
+            const editButton = document.createElement('button');
+            editIcon.className = 'fa-solid fa-pen-to-square';
+            editButton.type = 'button';
+            editButton.className = 'btn-icon btn-edit';
+            editButton.title = 'Editar';
+            editButton.append(editIcon);
+            editButton.onclick = () => openEditModal(transaction);
+
+            // Botão Excluir
+            const deleteIcon = document.createElement('i');
+            const deleteButton = document.createElement('button');
+            deleteIcon.className = 'fa-solid fa-trash-can';
+            deleteButton.type = 'button';
+            deleteButton.className = 'btn-icon btn-delete';
+            deleteButton.title = 'Excluir';
+            deleteButton.append(deleteIcon);
+            deleteButton.onclick = () => deleteTransaction(transaction.id);
+
+            const actionsCell = document.createElement('div');
+            actionsCell.className = 'transaction-actions';
+            actionsCell.append(editButton, deleteButton);
+
+            row.append(actionsCell);
+        } else {
+            row.className = 'transaction-item';
+        }
+
+        targetContainer.append(row);
+    });
 }
 
-// Atualiza os cards de saldo, receitas e despesas
 function updateCards() {
+    if(!balanceCard || !incomeCard || !expenseCard) return;
+
     let totalIncome = 0;
     let totalExpense = 0;
 
-    transactions.forEach((transaction) => {
-        if(transaction.type == 'income') {
-            totalIncome += transaction.value;
-        } else if(transaction.type == 'expense') {
-            totalExpense += transaction.value;
-        }
+    transactions.forEach(transaction => {
+        if(transaction.type === 'income') totalIncome += transaction.value;
+        if(transaction.type === 'expense') totalExpense += transaction.value;
     });
 
     balanceCard.textContent = formatCurrency(totalIncome - totalExpense);
-    incomeCard.textContent = formatCurrency(totalIncome);
-    expenseCard.textContent = formatCurrency(totalExpense);
+    incomeCard.textContent = `+ ${formatCurrency(totalIncome)}`;
+    expenseCard.textContent = `- ${formatCurrency(totalExpense)}`;
 }
 
-// Alterna e exibição das categorias com base no tipo selecionado
-function updateCategorySelect() {
-    const isIncome = typeSelect.value == 'income';
-    incomeGroup.hidden = !isIncome;
-    expenseGroup.hidden = isIncome;
-    categorySelect.value = '';
-}
-typeSelect.addEventListener('change', updateCategorySelect);
+// Popula as opções do select com suporte a pré-seleção
+function updateCategories(selectedCategory = null) {
+    if(!categorySelect || !typeSelect) return;
+    
+    categorySelect.innerHTML = '';
 
-// Salva as transações no navegador
-function saveLocalStorage() { 
-    localStorage.setItem('persouz_transactions', JSON.stringify(transactions));
+    const firstOption = document.createElement('option');
+    firstOption.value = '';
+    firstOption.disabled = true;
+    firstOption.selected = !selectedCategory;
+    firstOption.textContent = 'Selecione uma categoria...';
+
+    categorySelect.append(firstOption);
+
+    categories.forEach(category => {
+        if(category.type === typeSelect.value) {
+            const option = document.createElement('option');
+            option.value = category.name;
+            option.textContent = category.name;
+
+            if(selectedCategory && category.name === selectedCategory) {
+                option.selected = true;
+            }
+
+            categorySelect.append(option);
+        }
+    });
 }
 
-// Deleta a transação pelo ID após clicar no botão de apagar
+/* ==========================================================================
+   3. Operações de Adição, Edição e Exclusão
+   ========================================================================== */
+if(transactionForm) {
+    transactionForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const transactionData = {
+            description: descriptionInput.value,
+            date: dateInput.value,
+            category: categorySelect.value,
+            value: parseFloat(valueInput.value),
+            type: typeSelect.value,
+        };
+
+        if(editingTransactionId !== null) {
+            // Atualiza a transação existente no array
+            transactions = transactions.map(transaction => {
+                if(transaction.id === editingTransactionId) {
+                    return { ...transaction, ...transactionData };
+                }
+                return transaction;
+            });
+        } else {
+            // Cria uma nova transação com novo ID
+            const newTransaction = {
+                id: Date.now(),
+                ...transactionData
+            };
+            transactions.unshift(newTransaction);
+        }
+        
+        saveLocalStorage();
+        updateTransactions();
+        updateCards();
+        closeModal();
+    });
+
+    typeSelect.addEventListener('change', () => {
+        updateCategories();
+    });
+}
+
+function openEditModal(transaction) {
+    editingTransactionId = transaction.id;
+
+    if(modalTitle) modalTitle.textContent = 'Editar Transação';
+
+    // Preenche os campos com os dados existentes
+    descriptionInput.value = transaction.description;
+    valueInput.value = transaction.value;
+    typeSelect.value = transaction.type;
+    dateInput.value = transaction.date;
+
+    // Popula e marca a categoria salva como selecionada
+    updateCategories(transaction.category);
+
+    if(modalOverlay) modalOverlay.classList.add('active');
+}
+
 function deleteTransaction(id) {
     transactions = transactions.filter(transaction => transaction.id !== id);
     saveLocalStorage();
@@ -147,77 +282,111 @@ function deleteTransaction(id) {
     updateCards();
 }
 
-// Ativa a interatividade do menu mobile
-function setupMobileMenu() {
+function saveLocalStorage() { 
+    localStorage.setItem('persouz_transactions', JSON.stringify(transactions));
+}
+
+/* ==========================================================================
+   4. Componentes Interativos (Menu e Modal)
+   ========================================================================== */
+function initCompactMenu() {
     const btnMenu = document.querySelector('.btn-menu');
     const nav = document.querySelector('.nav');
 
-    if (btnMenu && nav) {
-        btnMenu.addEventListener('click', () => {
-            nav.classList.toggle('active');
+    if(!btnMenu || !nav) return;
 
-            const icon = btnMenu.querySelector('i');
-            if (icon) {
-                icon.classList.toggle('fa-bars');
-                icon.classList.toggle('fa-xmark');
+    const btnMenuIcon = btnMenu.querySelector('i');
+
+    btnMenu.addEventListener('click', (event) => {
+        event.stopPropagation();
+        nav.classList.toggle('active');
+        toggleMenuIcon(btnMenuIcon, nav.classList.contains('active'));
+    });
+
+    document.addEventListener('click', (event) => {
+        if(!nav.contains(event.target) && !btnMenu.contains(event.target) && nav.classList.contains('active')) {
+            nav.classList.remove('active');
+            toggleMenuIcon(btnMenuIcon, false);
+        }
+    });
+}
+
+function toggleMenuIcon(iconElement, isActive) {
+    if(!iconElement) return;
+    iconElement.className = isActive ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+}
+
+function initTransactionModal() {
+    const openBtn = document.getElementById('open-modal-btn');
+    const closeBtn = document.getElementById('close-modal-btn');
+    
+    if(!modalOverlay) return;
+    
+    if(openBtn) {
+        openBtn.addEventListener('click', () => {
+            editingTransactionId = null;
+            if(modalTitle) modalTitle.textContent = 'Adicionar Transação';
+            if(transactionForm) transactionForm.reset();
+
+            // Define a data de hoje como padrão (formato YYYY-MM-DD)
+            if(dateInput) {
+                dateInput.value = new Date().toISOString().split('T')[0];
             }
+
+            // Popula as categorias ao abrir o modal para criação
+            updateCategories();
+            modalOverlay.classList.add('active');
         });
     }
-}
 
-/* =================================== 
-    Eventos
-====================================== */
-
-// Adiciona uma nova transação quando o usuário clica no botão "Adicionar"
-transactionForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    const transaction = {
-        id: Date.now(),
-        description: descriptionInput.value,
-        date: dateInput.value,
-        category: categorySelect.value,
-        value: parseFloat(valueInput.value),
-        type: typeSelect.value,
+    if(closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
     }
+    
+    // Fecha o modal ao clicar fora
+    modalOverlay.addEventListener('click', (event) => {
+        if(event.target === modalOverlay) closeModal();
+    });
 
-    transactions.unshift(transaction);
-    transactionForm.reset();
-    updateTransactions();
-    updateCards();
-    updateCategorySelect();
-    saveLocalStorage();
-});
-
-// Fecha o menu mobile ao clicar fora do cabeçalho
-document.addEventListener('click', (event) => {
-    const header = document.querySelector('.header');
-    const nav = document.querySelector('.nav');
-    const btnMenuIcon = document.querySelector('.btn-menu i');
-
-    if (header && nav && !header.contains(event.target)) {
-        if (nav.classList.contains('active')) {
-            nav.classList.remove('active');
-            if (btnMenuIcon) {
-                btnMenuIcon.classList.add('fa-bars');
-                btnMenuIcon.classList.remove('fa-xmark');
-            }
+    // Fecha o modal ao pressionar a tecla ESC
+    document.addEventListener('keydown', (event) => {
+        if(event.key === 'Escape' && modalOverlay.classList.contains('active')) {
+            closeModal();
         }
-    }
-});
-
-/* =================================== 
-    Inicialização
-====================================== */
-
-// Executado quando a página abre pela primeira vez para carregar os dados
-function init() {
-    updateTransactions();
-    updateCards();
-    updateCategorySelect();
-    setupMobileMenu();
+    });
 }
 
-// Executa a inicialização
+function closeModal() {
+    if(modalOverlay) modalOverlay.classList.remove('active');
+    if(transactionForm) transactionForm.reset();
+    editingTransactionId = null;
+}
+
+/* ==========================================================================
+   5. Formatadores
+   ========================================================================== */
+function formatDate(dateString) {
+    if(!dateString) return '';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+}
+
+function formatCurrency(amount) {
+    return (amount || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+}
+
+/* ==========================================================================
+   6. Inicialização
+   ========================================================================== */
+function init() {
+    initCompactMenu();
+    initTransactionModal();
+    updateTransactions();
+    updateCards();
+    updateCategories();
+}
+
 init();
