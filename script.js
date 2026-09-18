@@ -4,7 +4,7 @@
    1. Variáveis Globais e Seletores
    2. Renderização do DOM
    3. Operações de Adição, Edição e Exclusão
-   4. Componentes Interativos (Menu e Modal)
+   4. Componentes Interativos
    5. Formatadores
    6. Inicialização
    ========================================================================== */
@@ -25,6 +25,10 @@ const valueInput = document.querySelector('#amount');
 const typeSelect = document.querySelector('#type');
 const categorySelect = document.querySelector('#category');
 const dateInput = document.querySelector('#date');
+const allTypeButton = document.querySelector('#btn-type-all');
+const incomeTypeButton = document.querySelector('#btn-type-income');
+const expenseTypeButton = document.querySelector('#btn-type-expense');
+const searchInput = document.querySelector('#search');
 
 // Armazena as transações salvas no LocalStorage
 let transactions = JSON.parse(localStorage.getItem('persouz_transactions')) || [];
@@ -63,26 +67,46 @@ let categories = [
     {name: 'Outros', type: 'income', icon: 'fa-ellipsis'}
 ];
 
-// Guarda o ID da transação em edição
+// Armazena o ID da transação em edição
 let editingTransactionId = null;
+
+// Armazena a opção selecionada nos botões de Tipo
+let selectedTypeButton = 'all';
+
+// Armazena o texto na barra de pesquisa
+let searchTextContent = '';
 
 /* ==========================================================================
    2. Renderização do DOM
    ========================================================================== */
-function updateTransactions() {
+function updateTransactions(type = 'all', search = '') {
     const targetContainer = fullTransactions || dashboardTransactions;
     if(!targetContainer) return;
 
     targetContainer.innerHTML = '';
 
-    let orderedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Ordena todas as transações por data
+    let filtered = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Na página principal, mostra apenas as 10 últimas
-    if(dashboardTransactions) {
-        orderedTransactions = orderedTransactions.slice(0, 10);
+    // Aplica o filtro de Tipo
+    if(type !== 'all') {
+        filtered = filtered.filter(transaction => transaction.type === type);
     }
 
-    if(orderedTransactions.length === 0) {
+    // Aplica o filtro de Busca por Descrição
+    if(search.trim() !== '') {
+        filtered = filtered.filter(transaction => 
+            transaction.description.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+
+    // Na página principal (Visão Geral), limita às 10 últimas
+    if(dashboardTransactions) {
+        filtered = filtered.slice(0, 10);
+    }
+
+    // Se a lista filtrada for vazia (ou sem dados originais), mostra o Estado Vazio
+    if(filtered.length === 0) {
         targetContainer.innerHTML = `
             <li class="empty-list-item">
                 <i class="fa-solid fa-receipt"></i>
@@ -92,7 +116,8 @@ function updateTransactions() {
         return;
     }
 
-    orderedTransactions.forEach(transaction => {
+    // Renderiza apenas as transações válidas
+    filtered.forEach(transaction => {
         const row = document.createElement('li');
         const isIncome = transaction.type === 'income';
         const typeClass = isIncome ? 'income' : 'expense';
@@ -133,7 +158,7 @@ function updateTransactions() {
 
         row.append(dateCell, categoryCell, typeCell, descriptionCell, valueCell);
 
-        // Ações de Editar e Excluir na página completa (transactions.html)
+        // Ações de editar e excluir na página de transações
         if(fullTransactions) {
             row.className = 'transaction-item with-actions';
 
@@ -287,7 +312,7 @@ function saveLocalStorage() {
 }
 
 /* ==========================================================================
-   4. Componentes Interativos (Menu e Modal)
+   4. Componentes Interativos
    ========================================================================== */
 function initCompactMenu() {
     const btnMenu = document.querySelector('.btn-menu');
@@ -362,6 +387,52 @@ function closeModal() {
     editingTransactionId = null;
 }
 
+function initTypeSelection() {
+    if(!allTypeButton || !incomeTypeButton || !expenseTypeButton)
+        return;
+
+    allTypeButton.onclick = () => {
+        selectedTypeButton = 'all';
+        updateTransactions(selectedTypeButton, searchTextContent);
+        updateTypeSelection();
+    }
+    incomeTypeButton.onclick = () => {
+        selectedTypeButton = 'income';
+        updateTransactions(selectedTypeButton, searchTextContent);
+        updateTypeSelection();
+    }
+    expenseTypeButton.onclick = () => {
+        selectedTypeButton = 'expense';
+        updateTransactions(selectedTypeButton, searchTextContent);
+        updateTypeSelection();
+    }
+}
+
+function updateTypeSelection() {
+    if(!allTypeButton || !incomeTypeButton || !expenseTypeButton)
+        return;
+
+    allTypeButton.classList.remove('active');
+    incomeTypeButton.classList.remove('active');
+    expenseTypeButton.classList.remove('active');
+
+    switch(selectedTypeButton) {
+        case 'income': incomeTypeButton.classList.add('active'); break;
+        case 'expense': expenseTypeButton.classList.add('active'); break;
+        default: allTypeButton.classList.add('active'); break;
+    }
+}
+
+function initSearchBar() {
+    if(!searchInput)
+        return;
+
+    searchInput.addEventListener('input', (event) => {
+        searchTextContent = event.target.value;
+        updateTransactions(selectedTypeButton, searchTextContent);
+    })
+}
+
 /* ==========================================================================
    5. Formatadores
    ========================================================================== */
@@ -384,6 +455,8 @@ function formatCurrency(amount) {
 function init() {
     initCompactMenu();
     initTransactionModal();
+    initTypeSelection();
+    initSearchBar();
     updateTransactions();
     updateCards();
     updateCategories();

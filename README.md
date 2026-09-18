@@ -57,7 +57,9 @@ O projeto está passando por uma rearquitetura para se tornar uma aplicação Fu
 ```text
 persouz-finance/
 ├── img/
+│   ├── favicon.png
 │   ├── persouz-logo.png
+│   ├── persouz-banner.png
 ├── index.html
 ├── login.html
 ├── register.html
