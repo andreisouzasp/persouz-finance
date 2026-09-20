@@ -16,7 +16,7 @@ const balanceCard = document.querySelector('#balance-card .card-value');
 const incomeCard = document.querySelector('#income-card .card-value');
 const expenseCard = document.querySelector('#expense-card .card-value');
 const dashboardTransactions = document.querySelector('#dashboard-transactions ul');
-const fullTransactions = document.querySelector('#full-transactions ul');
+const fullTransactions = document.querySelector('#full-transactions');
 const modalOverlay = document.querySelector('#transaction-modal');
 const modalTitle = document.querySelector('.modal-header h3');
 const transactionForm = document.querySelector('#transaction-form');
@@ -36,39 +36,42 @@ let transactions = JSON.parse(localStorage.getItem('persouz_transactions')) || [
 // Lista de categorias disponíveis para classificação das transações
 let categories = [
     // Despesas
-    {name: 'Alimentação', type: 'expense', icon: 'fa-utensils'},
-    {name: 'Assinaturas', type: 'expense', icon: 'fa-file-invoice-dollar'},
-    {name: 'Casa', type: 'expense', icon: 'fa-house'},
-    {name: 'Compras', type: 'expense', icon: 'fa-cart-shopping'},
-    {name: 'Dívidas', type: 'expense', icon: 'fa-hand-holding-dollar'},
-    {name: 'Educação', type: 'expense', icon: 'fa-book-open'},
-    {name: 'Empresarial', type: 'expense', icon: 'fa-briefcase'},
-    {name: 'Investimento', type: 'expense', icon: 'fa-chart-line'},
-    {name: 'Lazer', type: 'expense', icon: 'fa-gamepad'},
-    {name: 'Pessoal', type: 'expense', icon: 'fa-user'},
-    {name: 'Pet', type: 'expense', icon: 'fa-paw'},
-    {name: 'Saúde', type: 'expense', icon: 'fa-heart-pulse'},
-    {name: 'Serviços', type: 'expense', icon: 'fa-screwdriver-wrench'},
-    {name: 'Taxas', type: 'expense', icon: 'fa-percent'},
-    {name: 'Transferências', type: 'expense', icon: 'fa-right-left'},
-    {name: 'Transporte', type: 'expense', icon: 'fa-bus'},
-    {name: 'Vestuário', type: 'expense', icon: 'fa-shirt'},
-    {name: 'Viagem', type: 'expense', icon: 'fa-plane'},
+    {name: 'Alimentação', type: 'expense', icon: 'fa-utensils', color: '#f97316'}, // Laranja
+    {name: 'Assinaturas', type: 'expense', icon: 'fa-file-invoice-dollar', color: '#a855f7'}, // Roxo
+    {name: 'Casa', type: 'expense', icon: 'fa-house', color: '#14b8a6'}, // Teal (Verde-azulado)
+    {name: 'Compras', type: 'expense', icon: 'fa-cart-shopping', color: '#ec4899'}, // Rosa
+    {name: 'Dívidas', type: 'expense', icon: 'fa-hand-holding-dollar', color: '#ef4444'}, // Vermelho
+    {name: 'Educação', type: 'expense', icon: 'fa-book-open', color: '#3b82f6'}, // Azul
+    {name: 'Empresarial', type: 'expense', icon: 'fa-briefcase', color: '#64748b'}, // Slate (Cinza-azulado)
+    {name: 'Investimento', type: 'expense', icon: 'fa-chart-line', color: '#10b981'}, // Esmeralda
+    {name: 'Lazer', type: 'expense', icon: 'fa-gamepad', color: '#eab308'}, // Amarelo
+    {name: 'Pessoal', type: 'expense', icon: 'fa-user', color: '#6366f1'}, // Indigo
+    {name: 'Pet', type: 'expense', icon: 'fa-paw', color: '#d97706'}, // Âmbar
+    {name: 'Saúde', type: 'expense', icon: 'fa-heart-pulse', color: '#f43f5e'}, // Rose
+    {name: 'Serviços', type: 'expense', icon: 'fa-screwdriver-wrench', color: '#06b6d4'}, // Ciano
+    {name: 'Taxas', type: 'expense', icon: 'fa-percent', color: '#71717a'}, // Cinza
+    {name: 'Transferências', type: 'expense', icon: 'fa-right-left', color: '#0ea5e9'}, // Azul claro
+    {name: 'Transporte', type: 'expense', icon: 'fa-bus', color: '#f59e0b'}, // Amarelo-laranja
+    {name: 'Vestuário', type: 'expense', icon: 'fa-shirt', color: '#d946ef'}, // Fuchsia
+    {name: 'Viagem', type: 'expense', icon: 'fa-plane', color: '#38bdf8'}, // Sky (Azul céu)
 
     // Receitas
-    {name: 'Cashback', type: 'income', icon: 'fa-money-bill-wave'},
-    {name: 'Fatura', type: 'income', icon: 'fa-file-invoice-dollar'},
-    {name: 'Presente', type: 'income', icon: 'fa-gift'},
-    {name: 'Prêmio', type: 'income', icon: 'fa-trophy'},
-    {name: 'Receitas variáveis', type: 'income', icon: 'fa-wallet'},
-    {name: 'Renda extra', type: 'income', icon: 'fa-briefcase'},
-    {name: 'Salário', type: 'income', icon: 'fa-sack-dollar'},
-    {name: 'Transferências', type: 'income', icon: 'fa-right-left'},
-    {name: 'Outros', type: 'income', icon: 'fa-ellipsis'}
+    {name: 'Cashback', type: 'income', icon: 'fa-money-bill-wave', color: '#10b981'}, // Esmeralda
+    {name: 'Fatura', type: 'income', icon: 'fa-file-invoice-dollar', color: '#3b82f6'}, // Azul
+    {name: 'Presente', type: 'income', icon: 'fa-gift', color: '#ec4899'}, // Rosa
+    {name: 'Prêmio', type: 'income', icon: 'fa-trophy', color: '#eab308'}, // Amarelo
+    {name: 'Receitas variáveis', type: 'income', icon: 'fa-wallet', color: '#14b8a6'}, // Teal
+    {name: 'Renda extra', type: 'income', icon: 'fa-briefcase', color: '#f97316'}, // Laranja
+    {name: 'Salário', type: 'income', icon: 'fa-sack-dollar', color: '#34d399'}, // Verde Persouz
+    {name: 'Transferências', type: 'income', icon: 'fa-right-left', color: '#0ea5e9'}, // Azul claro
+    {name: 'Outros', type: 'income', icon: 'fa-ellipsis', color: '#94a3b8'} // Slate claro
 ];
 
 // Armazena o ID da transação em edição
 let editingTransactionId = null;
+
+// Armazena o ID da transação pendente de exclusão
+let pendingDeleteTransactionId = null;
 
 // Armazena a opção selecionada nos botões de Tipo
 let selectedTypeButton = 'all';
@@ -79,8 +82,10 @@ let searchTextContent = '';
 /* ==========================================================================
    2. Renderização do DOM
    ========================================================================== */
-function updateTransactions(type = 'all', search = '') {
+function renderTransactions(type = 'all', search = '') {
     const targetContainer = fullTransactions || dashboardTransactions;
+    let currentDate = null;
+
     if(!targetContainer) return;
 
     targetContainer.innerHTML = '';
@@ -107,18 +112,26 @@ function updateTransactions(type = 'all', search = '') {
 
     // Se a lista filtrada for vazia (ou sem dados originais), mostra o Estado Vazio
     if(filtered.length === 0) {
-        targetContainer.innerHTML = `
-            <li class="empty-list-item">
-                <i class="fa-solid fa-receipt"></i>
-                <p>Nenhuma transação encontrada</p>
-            </li>
-        `;
+        const row = document.createElement('div');
+        row.className = 'empty-list-item';
+        row.textContent = 'Nenhuma transação encontrada';
+        const emptyIcon = document.createElement('i');
+        emptyIcon.className = 'fa-solid fa-receipt';
+        row.prepend(emptyIcon);
+        targetContainer.append(row);
         return;
     }
 
     // Renderiza apenas as transações válidas
     filtered.forEach(transaction => {
-        const row = document.createElement('li');
+        if(fullTransactions && currentDate !== transaction.date) {
+            currentDate = transaction.date;
+            const listTitle = document.createElement('h2');
+            listTitle.textContent = formatReadableDate(transaction.date);
+            targetContainer.append(listTitle);
+        }
+
+        const row = document.createElement(fullTransactions ? 'div' : 'li');
         const isIncome = transaction.type === 'income';
         const typeClass = isIncome ? 'income' : 'expense';
         const sign = isIncome ? '+' : '-';
@@ -128,23 +141,28 @@ function updateTransactions(type = 'all', search = '') {
         const dateCell = document.createElement('div');
         dateIcon.className = 'fa-solid fa-calendar';
         dateCell.className = 'transaction-date';
-        dateCell.append(dateIcon, document.createTextNode(` ${formatDate(transaction.date)}`));
+        dateCell.prepend(dateIcon);
+        dateCell.append(` ${formatDate(transaction.date)}`);
 
         // Categoria
         const categoryIcon = document.createElement('i');
         const categoryCell = document.createElement('div');
         const matchedCategory = categories.find(cat => cat.name === transaction.category);
         const iconClass = matchedCategory ? matchedCategory.icon : 'fa-tag';
+        const iconColor = matchedCategory ? matchedCategory.color : '#94a3b8'; 
         categoryIcon.className = `fa-solid ${iconClass}`;
+        categoryIcon.style.color = iconColor;
         categoryCell.className = 'transaction-category';
-        categoryCell.append(categoryIcon, document.createTextNode(` ${transaction.category}`));
+        categoryCell.prepend(categoryIcon);
+        categoryCell.append(` ${transaction.category}`);
 
         // Badge Tipo
         const typeIcon = document.createElement('i');
         const typeCell = document.createElement('div');
         typeIcon.className = `fa-solid fa-arrow-${isIncome ? 'up' : 'down'}`;
-        typeCell.className = `badge badge-${typeClass}`;        
-        typeCell.append(typeIcon, document.createTextNode(` ${isIncome ? 'Receita' : 'Despesa'}`));
+        typeCell.className = `badge badge-${typeClass}`;
+        typeCell.prepend(typeIcon);
+        typeCell.append(` ${isIncome ? 'Receita' : 'Despesa'}`);
 
         // Descrição
         const descriptionCell = document.createElement('div');
@@ -180,7 +198,7 @@ function updateTransactions(type = 'all', search = '') {
             deleteButton.className = 'btn-icon btn-delete';
             deleteButton.title = 'Excluir';
             deleteButton.append(deleteIcon);
-            deleteButton.onclick = () => deleteTransaction(transaction.id);
+            deleteButton.onclick = () => openDeleteModal(transaction.id);
 
             const actionsCell = document.createElement('div');
             actionsCell.className = 'transaction-actions';
@@ -195,24 +213,7 @@ function updateTransactions(type = 'all', search = '') {
     });
 }
 
-function updateCards() {
-    if(!balanceCard || !incomeCard || !expenseCard) return;
-
-    let totalIncome = 0;
-    let totalExpense = 0;
-
-    transactions.forEach(transaction => {
-        if(transaction.type === 'income') totalIncome += transaction.value;
-        if(transaction.type === 'expense') totalExpense += transaction.value;
-    });
-
-    balanceCard.textContent = formatCurrency(totalIncome - totalExpense);
-    incomeCard.textContent = `+ ${formatCurrency(totalIncome)}`;
-    expenseCard.textContent = `- ${formatCurrency(totalExpense)}`;
-}
-
-// Popula as opções do select com suporte a pré-seleção
-function updateCategories(selectedCategory = null) {
+function renderCategories(selectedCategory = null) {
     if(!categorySelect || !typeSelect) return;
     
     categorySelect.innerHTML = '';
@@ -238,6 +239,56 @@ function updateCategories(selectedCategory = null) {
             categorySelect.append(option);
         }
     });
+}
+
+function renderCategoriesPage() {
+    const expenseContainer = document.getElementById('expense-categories');
+    const incomeContainer = document.getElementById('income-categories');
+
+    if(!expenseContainer || !incomeContainer) return;
+
+    expenseContainer.innerHTML = '';
+    incomeContainer.innerHTML = '';
+
+    categories.forEach(category => {
+        const card = document.createElement('div');
+        card.className = `category-card`;
+
+        // Injeta a cor como uma variável CSS no card para usarmos no style.css
+        card.style.setProperty('--cat-color', category.color);
+
+        const icon = document.createElement('i');
+        icon.className = `fa-solid ${category.icon}`;
+        // Aplica a cor diretamente no ícone
+        icon.style.color = category.color;
+
+        const name = document.createElement('span');
+        name.textContent = category.name;
+
+        card.append(icon, name);
+
+        if(category.type === 'expense') {
+            expenseContainer.append(card);
+        } else {
+            incomeContainer.append(card);
+        }
+    });
+}
+
+function updateCards() {
+    if(!balanceCard || !incomeCard || !expenseCard) return;
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    transactions.forEach(transaction => {
+        if(transaction.type === 'income') totalIncome += transaction.value;
+        if(transaction.type === 'expense') totalExpense += transaction.value;
+    });
+
+    balanceCard.textContent = formatCurrency(totalIncome - totalExpense);
+    incomeCard.textContent = `+ ${formatCurrency(totalIncome)}`;
+    expenseCard.textContent = `- ${formatCurrency(totalExpense)}`;
 }
 
 /* ==========================================================================
@@ -273,29 +324,106 @@ if(transactionForm) {
         }
         
         saveLocalStorage();
-        updateTransactions();
+        renderTransactions();
         updateCards();
         closeModal();
     });
 
     typeSelect.addEventListener('change', () => {
-        updateCategories();
+        renderCategories();
     });
+}
+
+function showTransactionForm() {
+    if(transactionForm) transactionForm.style.display = 'block';
+    const deleteConfirmation = document.querySelector('.delete-confirmation');
+    if(deleteConfirmation) deleteConfirmation.style.display = 'none';
+}
+
+function ensureDeleteConfirmation() {
+    if(!modalOverlay) return null;
+
+    let deleteConfirmation = document.querySelector('.delete-confirmation');
+
+    if(!deleteConfirmation) {
+        deleteConfirmation = document.createElement('div');
+        deleteConfirmation.className = 'delete-confirmation';
+        const message = document.createElement('p');
+        message.textContent = 'Deseja realmente excluir esta transação?';
+
+        const actions = document.createElement('div');
+        actions.className = 'modal-actions';
+
+        const btnCancel = document.createElement('button');
+        btnCancel.type = 'button';
+        btnCancel.className = 'btn btn-secondary btn-cancel-delete';
+        btnCancel.textContent = 'Cancelar';
+
+        const btnConfirm = document.createElement('button');
+        btnConfirm.type = 'button';
+        btnConfirm.className = 'btn btn-danger btn-confirm-delete';
+        btnConfirm.textContent = 'Excluir';
+
+        actions.appendChild(btnCancel);
+        actions.appendChild(btnConfirm);
+
+        deleteConfirmation.appendChild(message);
+        deleteConfirmation.appendChild(actions);
+
+        deleteConfirmation.style.display = 'none';
+
+        const modalContent = modalOverlay.querySelector('.modal-content')
+            || modalOverlay.querySelector('.modal-body')
+            || modalOverlay.querySelector('.modal-card')
+            || modalOverlay;
+
+        if(deleteConfirmation.parentElement !== modalContent) {
+            modalContent.appendChild(deleteConfirmation);
+        }
+
+        deleteConfirmation.querySelector('.btn-cancel-delete').addEventListener('click', () => {
+            closeModal();
+        });
+
+        deleteConfirmation.querySelector('.btn-confirm-delete').addEventListener('click', () => {
+            if(pendingDeleteTransactionId === null) return;
+
+            deleteTransaction(pendingDeleteTransactionId);
+            closeModal();
+        });
+    }
+
+    return deleteConfirmation;
 }
 
 function openEditModal(transaction) {
     editingTransactionId = transaction.id;
+    pendingDeleteTransactionId = null;
+    showTransactionForm();
 
     if(modalTitle) modalTitle.textContent = 'Editar Transação';
 
-    // Preenche os campos com os dados existentes
     descriptionInput.value = transaction.description;
     valueInput.value = transaction.value;
     typeSelect.value = transaction.type;
     dateInput.value = transaction.date;
+    renderCategories(transaction.category);
 
-    // Popula e marca a categoria salva como selecionada
-    updateCategories(transaction.category);
+    if(modalOverlay) modalOverlay.classList.add('active');
+}
+
+function openDeleteModal(id) {
+    pendingDeleteTransactionId = id;
+    editingTransactionId = null;
+
+    if(transactionForm) transactionForm.style.display = 'none';
+
+    const deleteConfirmation = ensureDeleteConfirmation();
+    if(deleteConfirmation) {
+        deleteConfirmation.style.display = 'block';
+    }
+
+    if(modalTitle) modalTitle.textContent = 'Confirmar exclusão';
 
     if(modalOverlay) modalOverlay.classList.add('active');
 }
@@ -303,8 +431,9 @@ function openEditModal(transaction) {
 function deleteTransaction(id) {
     transactions = transactions.filter(transaction => transaction.id !== id);
     saveLocalStorage();
-    updateTransactions();
+    renderTransactions();
     updateCards();
+    pendingDeleteTransactionId = null;
 }
 
 function saveLocalStorage() { 
@@ -350,6 +479,8 @@ function initTransactionModal() {
     if(openBtn) {
         openBtn.addEventListener('click', () => {
             editingTransactionId = null;
+            pendingDeleteTransactionId = null;
+            showTransactionForm();
             if(modalTitle) modalTitle.textContent = 'Adicionar Transação';
             if(transactionForm) transactionForm.reset();
 
@@ -359,7 +490,7 @@ function initTransactionModal() {
             }
 
             // Popula as categorias ao abrir o modal para criação
-            updateCategories();
+            renderCategories();
             modalOverlay.classList.add('active');
         });
     }
@@ -383,8 +514,16 @@ function initTransactionModal() {
 
 function closeModal() {
     if(modalOverlay) modalOverlay.classList.remove('active');
-    if(transactionForm) transactionForm.reset();
+    if(transactionForm) {
+        transactionForm.reset();
+        transactionForm.style.display = 'block';
+    }
+
+    const deleteConfirmation = document.querySelector('.delete-confirmation');
+    if(deleteConfirmation) deleteConfirmation.style.display = 'none';
+
     editingTransactionId = null;
+    pendingDeleteTransactionId = null;
 }
 
 function initTypeSelection() {
@@ -393,17 +532,17 @@ function initTypeSelection() {
 
     allTypeButton.onclick = () => {
         selectedTypeButton = 'all';
-        updateTransactions(selectedTypeButton, searchTextContent);
+        renderTransactions(selectedTypeButton, searchTextContent);
         updateTypeSelection();
     }
     incomeTypeButton.onclick = () => {
         selectedTypeButton = 'income';
-        updateTransactions(selectedTypeButton, searchTextContent);
+        renderTransactions(selectedTypeButton, searchTextContent);
         updateTypeSelection();
     }
     expenseTypeButton.onclick = () => {
         selectedTypeButton = 'expense';
-        updateTransactions(selectedTypeButton, searchTextContent);
+        renderTransactions(selectedTypeButton, searchTextContent);
         updateTypeSelection();
     }
 }
@@ -429,7 +568,7 @@ function initSearchBar() {
 
     searchInput.addEventListener('input', (event) => {
         searchTextContent = event.target.value;
-        updateTransactions(selectedTypeButton, searchTextContent);
+        renderTransactions(selectedTypeButton, searchTextContent);
     })
 }
 
@@ -440,6 +579,61 @@ function formatDate(dateString) {
     if(!dateString) return '';
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
+}
+
+function formatReadableDate(dateString) {
+    if(!dateString) return '';
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const today = new Date();
+    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    const yesterday = new Date(todayDate);
+    yesterday.setDate(todayDate.getDate() - 1);
+
+    if(date.getTime() === todayDate.getTime())
+        return 'Hoje';
+
+    if(date.getTime() === yesterday.getTime())
+        return 'Ontem';
+
+    const dayNames = [
+        'Domingo',
+        'Segunda-feira',
+        'Terça-feira',
+        'Quarta-feira',
+        'Quinta-feira',
+        'Sexta-feira',
+        'Sábado'
+    ];
+
+    const startOfWeek = new Date(todayDate);
+    const currentDay = todayDate.getDay();
+    const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+    startOfWeek.setDate(todayDate.getDate() + diffToMonday);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    if(date >= startOfWeek && date <= endOfWeek)
+        return dayNames[date.getDay()];
+
+    const abbreviatedMonths = [
+        'jan',
+        'fev',
+        'mar',
+        'abr',
+        'mai',
+        'jun',
+        'jul',
+        'ago',
+        'set',
+        'out',
+        'nov',
+        'dez'
+    ];
+
+    return `${day} de ${abbreviatedMonths[month - 1]}.`;
 }
 
 function formatCurrency(amount) {
@@ -457,9 +651,10 @@ function init() {
     initTransactionModal();
     initTypeSelection();
     initSearchBar();
-    updateTransactions();
+    renderTransactions();
     updateCards();
-    updateCategories();
+    renderCategories();
+    renderCategoriesPage();
 }
 
 init();

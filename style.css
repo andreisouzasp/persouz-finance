@@ -9,9 +9,10 @@
    6. Blocos de Conteúdo & Listas de Transações
    7. Botões
    8. Páginas de Autenticação (Login e Register)
-   9. Rodapé
-   10. Responsividade (Media Queries)
+   9. Página de Categorias
+   10. Rodapé
    11. Janela Modal
+   12. Responsividade (Media Queries)
    ========================================================================== */
 
 /* ==========================================================================
@@ -398,7 +399,7 @@ i {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    padding: 1.3rem;
+    padding: 0 1.3rem 1.3rem;
     margin-top: 1.3rem;
     backdrop-filter: blur(var(--blur-soft));
     -webkit-backdrop-filter: blur(var(--blur-soft));
@@ -408,7 +409,7 @@ i {
 .content-block h3 {
     font-size: 1.2rem;
     font-weight: 700;
-    margin-bottom: 1em;
+    margin: 1rem 0;
     color: var(--text-primary);
 }
 
@@ -435,6 +436,7 @@ i {
     align-items: center;
     justify-content: center;
     padding: 2.5rem 1rem;
+    margin-top: 1.3rem;
     color: var(--text-secondary);
     gap: 0.75rem;
     border: 2px dashed var(--border-color);
@@ -494,6 +496,11 @@ i {
 .dashboard-transactions-header {
     display: flex;
     justify-content: space-between;
+}
+
+.dashboard-transactions-header h3 {
+    align-self: center;
+    margin-bottom: 0;
 }
 
 /* ==========================================================================
@@ -565,11 +572,13 @@ i {
     white-space: nowrap;
     padding: 0.7rem 1.2rem;
     font-size: 0.9rem;
+    margin-top: 1rem;
 }
 
 .btn-add-transaction {
     width: 10rem;
     justify-self: end;
+    margin-top: 0;
 }
 
 .btn-type {
@@ -726,7 +735,69 @@ i {
 }
 
 /* ==========================================================================
-   9. Rodapé
+   9. Página de Categorias
+   ========================================================================== */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 1rem;
+}
+
+.category-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    text-align: center;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--cat-color);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    z-index: 0;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--cat-color);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.category-card:hover::before {
+    opacity: 0.08;
+}
+
+.category-card i, .category-card span {
+    position: relative;
+    z-index: 1;
+}
+
+.category-card i {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 8px var(--cat-color)); 
+}
+
+.category-card span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   10. Rodapé
    ========================================================================== */
 .footer {
     padding: 1.3rem;
@@ -739,135 +810,6 @@ i {
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     margin-top: auto;
-}
-
-/* ==========================================================================
-   10. Responsividade (Media Queries)
-   ========================================================================== */
-@media (max-width: 900px) {
-    .header .logo {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
-    .compact-menu { display: block; }
-    .user-info, .nav { display: none; }
-
-    .nav.active {
-        display: flex;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        padding: 1rem 1.25rem;
-        background: var(--bg-color);
-        border-bottom: 1px solid var(--surface-border);
-        box-shadow: var(--shadow-md);
-        z-index: 50;
-    }
-
-    .nav.active ul {
-        flex-direction: column;
-        width: 100%;
-        padding: 0;
-    }
-
-    .nav.active ul li, .nav.active ul a {
-        width: 100%;
-        display: block;
-        text-align: center;
-    }
-
-    .cards { grid-template-columns: 1fr; }
-
-    .transaction-item {
-        grid-template-columns: 1fr auto !important;
-        grid-template-areas:
-            "desc value"
-            "category value"
-            "date btns"
-            "type btns" !important;
-        gap: 0.5rem;
-        align-items: center;
-        padding: 1rem;
-    }
-
-    .transaction-description { 
-        grid-area: desc; 
-        justify-self: start; 
-        font-weight: 700;
-    }
-
-    .transaction-category { 
-        grid-area: category; 
-        justify-self: start; 
-        text-align: left; 
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-    }
-
-    .transaction-date { 
-        grid-area: date; 
-        justify-self: start; 
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-    }
-
-    .badge { 
-        grid-area: type; 
-        justify-self: start; 
-    }
-
-    .transaction-value { 
-        grid-area: value; 
-        justify-self: end; 
-        font-size: 1.1rem;
-    }
-
-    .transaction-actions { 
-        grid-area: btns; 
-        justify-self: end; 
-    }
-}
-
-@media (max-width: 700px) {
-    .full-transactions-header {
-        gap: 1rem;
-        grid-template-columns: 1fr auto;
-        grid-template-areas:
-            "type type"
-            "search addbtn"
-    }
-
-    .filter-type {
-        justify-content: center;
-        grid-area: type;
-    }
-
-    .btn-add-transaction {
-        width: auto;
-        grid-area: addbtn;
-    }
-
-    .search-block {
-        grid-area: search;
-    }
-}
-
-@media (max-width: 550px) {
-    .dashboard-transactions-header {
-        flex-direction: column;
-        margin-bottom: 1rem;
-    }
-
-    .btn-show-all {
-        width: 100%;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    body::before, body::after { animation: none; }
 }
 
 /* ==========================================================================
@@ -946,4 +888,197 @@ i {
 
 .form-group select:focus {
     border-color: var(--persouz-secondary);
+}
+
+.delete-confirmation p {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.delete-confirmation p i {
+    color: var(--delete-color-soft);
+    background: rgba(255,255,255,0.02);
+    padding: 0.45rem;
+    border-radius: 8px;
+    font-size: 1.05rem;
+}
+
+.delete-confirmation .modal-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+}
+
+.delete-confirmation .btn {
+    min-width: 4.6rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all var(--transition-fast);
+}
+
+.delete-confirmation .btn.btn-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.delete-confirmation .btn.btn-secondary:hover {
+    background: rgba(255,255,255,0.02);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.delete-confirmation .btn.btn-danger {
+    background: linear-gradient(90deg, rgba(239,68,68,0.95), rgba(244,63,94,0.95));
+    color: #fff;
+    border: 1px solid var(--delete-border-hover);
+    box-shadow: 0 10px 24px rgba(239,68,68,0.14);
+}
+
+.delete-confirmation .btn.btn-danger:hover {
+    filter: brightness(1.04);
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   12. Responsividade (Media Queries)
+   ========================================================================== */
+@media (max-width: 900px) {
+    .header .logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .compact-menu { display: block; }
+    .user-info, .nav { display: none; }
+
+    .nav.active {
+        display: flex;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        padding: 1rem 1.25rem;
+        background: var(--bg-color);
+        border-bottom: 1px solid var(--surface-border);
+        box-shadow: var(--shadow-md);
+        z-index: 50;
+    }
+
+    .nav.active ul {
+        flex-direction: column;
+        width: 100%;
+        padding: 0;
+    }
+
+    .nav.active ul li, .nav.active ul a {
+        width: 100%;
+        display: block;
+        text-align: center;
+    }
+
+    .cards { grid-template-columns: 1fr; }
+
+    .transaction-item {
+        grid-template-columns: 1fr auto !important;
+        grid-template-areas:
+            "desc value"
+            "category value"
+            "date actions"
+            "type actions" !important;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .transaction-description { 
+        grid-area: desc; 
+        justify-self: start; 
+        font-weight: 700;
+    }
+
+    .transaction-category { 
+        grid-area: category; 
+        justify-self: start; 
+        text-align: left; 
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .transaction-date { 
+        grid-area: date; 
+        justify-self: start; 
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .badge { 
+        grid-area: type; 
+        justify-self: start; 
+    }
+
+    .transaction-value { 
+        grid-area: value; 
+        justify-self: end; 
+        font-size: 1.1rem;
+    }
+
+    .transaction-actions { 
+        grid-area: actions; 
+        justify-self: end; 
+    }
+}
+
+@media (max-width: 700px) {
+    .full-transactions-header {
+        gap: 1rem;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "type type"
+            "search add"
+    }
+
+    .filter-type {
+        justify-content: center;
+        grid-area: type;
+    }
+
+    .btn-add-transaction {
+        width: auto;
+        grid-area: add;
+    }
+
+    .search-block {
+        grid-area: search;
+    }
+}
+
+@media (max-width: 550px) {
+    .dashboard-transactions-header {
+        flex-direction: column;
+        margin-bottom: 1rem;
+    }
+
+   .dashboard-transactions-header h3 {
+        align-self: start;
+        margin-bottom: 0;
+    }
+
+    .btn-show-all {
+        width: 100%;
+        margin-top: 1rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before, body::after { animation: none; }
 }

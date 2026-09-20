@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persouz Finance - Visão Geral</title>
+
+    <!-- Meta tags para SEO e Compartilhamento (Open Graph e Twitter Card) -->
+    <meta name="description" content="Controle suas finanças de forma simples e inteligente.">
+
+    <!-- Open Graph (Facebook / WhatsApp / LinkedIn) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://andreisouzasp.github.io/persouz-finance/">
+    <meta property="og:title" content="Persouz Finance">
+    <meta property="og:description" content="Controle suas finanças de forma simples e inteligente.">
+    <meta property="og:image" content="https://andreisouzasp.github.io/persouz-finance/img/persouz-banner.jpg">
+    <meta property="og:image:secure_url" content="https://andreisouzasp.github.io/persouz-finance/img/persouz-banner.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card (Força a imagem grande no topo) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Persouz Finance">
+    <meta name="twitter:description" content="Controle suas finanças de forma simples e inteligente.">
+    <meta name="twitter:image" content="https://andreisouzasp.github.io/persouz-finance/img/persouz-banner.jpg">
+
+    <!-- Estilos e Fontes -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="icon" type="image/png" href="img/favicon.png">
+
+    <!-- Scripts (Defer para carregar após o HTML) -->
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <!-- Cabeçalho Principal -->
+    <header class="header">
+        <div class="compact-menu">
+            <button type="button" class="btn-menu" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
+        </div>
+
+        <a href="index.html" class="logo" aria-label="Persouz Finance - Página Inicial">
+            <img src="img/persouz-logo.png" class="logo-icon" alt="Logo da Persouz Finance">
+            <span class="logo-text">Persouz <span class="logo-highlight">Finance</span></span>
+        </a>
+
+        <!-- Menu de Navegação -->
+        <nav class="nav" aria-label="Navegação Principal">
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-chart-pie"></i> Visão Geral</a></li>
+                <li><a href="transactions.html"><i class="fa-solid fa-money-bill-transfer"></i> Transações</a></li>
+                <li><a href="categories.html" class="active" aria-current="page"><i class="fa-solid fa-tags"></i> Categorias</a></li>
+            </ul>
+        </nav>
+
+        <!-- Informações do Usuário -->
+        <div class="user-info">
+            <div class="user-icon"><i class="fa-solid fa-user"></i></div>
+            <span>Olá, <span class="user-name">Andrei</span>!</span>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="container">
+        <h1 class="sr-only">Categorias</h1>
+
+        <!-- Seção: Despesas -->
+        <section class="content-block" style="margin-top: 0;">
+            <h2><i class="fa-solid fa-arrow-down txt-expense"></i> Categorias de Despesas</h2>
+            <div class="categories-grid" id="expense-categories"></div>
+        </section>
+
+        <!-- Seção: Receitas -->
+        <section class="content-block">
+            <h2><i class="fa-solid fa-arrow-up txt-income"></i> Categorias de Receitas</h2>
+            <div class="categories-grid" id="income-categories"></div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="footer">
+        <small>Persouz Finance &copy; 2026 | Todos os direitos reservados.</small>
+    </footer>
+</body>
+</html>

@@ -59,11 +59,12 @@ persouz-finance/
 ├── img/
 │   ├── favicon.png
 │   ├── persouz-logo.png
-│   ├── persouz-banner.png
+│   ├── persouz-banner.jpg
 ├── index.html
 ├── login.html
 ├── register.html
 ├── transactions.html
+├── categories.html
 ├── style.css
 ├── script.js
 └── README.md
