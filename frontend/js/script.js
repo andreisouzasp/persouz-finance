@@ -12,6 +12,7 @@
 /* ==========================================================================
    1. Variáveis Globais e Seletores
    ========================================================================== */
+const API_URL = "http://localhost:3000/transactions";
 const balanceCard = document.querySelector('#balance-card .card-value');
 const incomeCard = document.querySelector('#income-card .card-value');
 const expenseCard = document.querySelector('#expense-card .card-value');
@@ -30,8 +31,8 @@ const incomeTypeButton = document.querySelector('#btn-type-income');
 const expenseTypeButton = document.querySelector('#btn-type-expense');
 const searchInput = document.querySelector('#search');
 
-// Armazena as transações salvas no LocalStorage
-let transactions = JSON.parse(localStorage.getItem('persouz_transactions')) || [];
+// Armazena as transações
+let transactions = [];
 
 // Lista de categorias disponíveis para classificação das transações
 let categories = [
@@ -215,29 +216,31 @@ function renderTransactions(type = 'all', search = '') {
 
 function renderCategories(selectedCategory = null) {
     if(!categorySelect || !typeSelect) return;
-    
+
     categorySelect.innerHTML = '';
 
+    const availableCategories = categories.filter(category => category.type === typeSelect.value);
     const firstOption = document.createElement('option');
     firstOption.value = '';
     firstOption.disabled = true;
-    firstOption.selected = !selectedCategory;
     firstOption.textContent = 'Selecione uma categoria...';
+
+    if(!selectedCategory || !availableCategories.some(category => category.name === selectedCategory)) {
+        firstOption.selected = true;
+    }
 
     categorySelect.append(firstOption);
 
-    categories.forEach(category => {
-        if(category.type === typeSelect.value) {
-            const option = document.createElement('option');
-            option.value = category.name;
-            option.textContent = category.name;
+    availableCategories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.name;
+        option.textContent = category.name;
 
-            if(selectedCategory && category.name === selectedCategory) {
-                option.selected = true;
-            }
-
-            categorySelect.append(option);
+        if(selectedCategory && category.name === selectedCategory) {
+            option.selected = true;
         }
+
+        categorySelect.append(option);
     });
 }
 
@@ -291,45 +294,75 @@ function updateCards() {
     expenseCard.textContent = `- ${formatCurrency(totalExpense)}`;
 }
 
+async function loadTransactions() {
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error("Erro ao buscar transações");
+        transactions = await response.json();
+        renderTransactions();
+        updateCards();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 /* ==========================================================================
    3. Operações de Adição, Edição e Exclusão
    ========================================================================== */
 if(transactionForm) {
-    transactionForm.addEventListener('submit', (event) => {
+    transactionForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        const description = descriptionInput?.value?.trim() || '';
+        const date = dateInput?.value || '';
+        const category = categorySelect?.value || '';
+        const value = Number.parseFloat(valueInput?.value || '0');
+        const type = typeSelect?.value || '';
+
+        if(!description || !date || !category || !type || Number.isNaN(value) || value <= 0) {
+            alert('Preencha todos os campos corretamente antes de salvar a transação.');
+            return;
+        }
+
         const transactionData = {
-            description: descriptionInput.value,
-            date: dateInput.value,
-            category: categorySelect.value,
-            value: parseFloat(valueInput.value),
-            type: typeSelect.value,
+            description,
+            date,
+            category,
+            value,
+            type,
         };
 
-        if(editingTransactionId !== null) {
-            // Atualiza a transação existente no array
-            transactions = transactions.map(transaction => {
-                if(transaction.id === editingTransactionId) {
-                    return { ...transaction, ...transactionData };
-                }
-                return transaction;
+        try {
+            const isEditing = editingTransactionId !== null;
+            const url = isEditing ? `${API_URL}/${editingTransactionId}` : API_URL;
+            const method = isEditing ? "PUT" : "POST";
+
+            const response = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(transactionData)
             });
-        } else {
-            // Cria uma nova transação com novo ID
-            const newTransaction = {
-                id: Date.now(),
-                ...transactionData
-            };
-            transactions.unshift(newTransaction);
+
+            if (!response.ok) {
+                let errorMessage = "Erro ao salvar transação";
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.erro || errorMessage;
+                } catch {
+                    // Ignora erro ao parsear resposta vazia ou não JSON
+                }
+                throw new Error(errorMessage);
+            }
+
+            await loadTransactions();
+            closeModal();
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'Não foi possível salvar a transação.');
         }
-        
-        saveLocalStorage();
-        renderTransactions();
-        updateCards();
-        closeModal();
     });
 
-    typeSelect.addEventListener('change', () => {
+    typeSelect?.addEventListener('change', () => {
         renderCategories();
     });
 }
@@ -385,10 +418,10 @@ function ensureDeleteConfirmation() {
             closeModal();
         });
 
-        deleteConfirmation.querySelector('.btn-confirm-delete').addEventListener('click', () => {
+        deleteConfirmation.querySelector('.btn-confirm-delete').addEventListener('click', async () => {
             if(pendingDeleteTransactionId === null) return;
 
-            deleteTransaction(pendingDeleteTransactionId);
+            await deleteTransaction(pendingDeleteTransactionId);
             closeModal();
         });
     }
@@ -428,16 +461,20 @@ function openDeleteModal(id) {
     if(modalOverlay) modalOverlay.classList.add('active');
 }
 
-function deleteTransaction(id) {
-    transactions = transactions.filter(transaction => transaction.id !== id);
-    saveLocalStorage();
-    renderTransactions();
-    updateCards();
-    pendingDeleteTransactionId = null;
-}
+async function deleteTransaction(id) {
+    try {
+        const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
 
-function saveLocalStorage() { 
-    localStorage.setItem('persouz_transactions', JSON.stringify(transactions));
+        if (!response.ok) {
+            throw new Error("Erro ao excluir transação");
+        }
+
+        await loadTransactions();
+        pendingDeleteTransactionId = null;
+    } catch (error) {
+        console.error(error);
+        alert("Não foi possível excluir a transação.");
+    }
 }
 
 /* ==========================================================================
@@ -517,6 +554,10 @@ function closeModal() {
     if(transactionForm) {
         transactionForm.reset();
         transactionForm.style.display = 'block';
+    }
+
+    if(categorySelect) {
+        categorySelect.innerHTML = '';
     }
 
     const deleteConfirmation = document.querySelector('.delete-confirmation');
@@ -651,8 +692,7 @@ function init() {
     initTransactionModal();
     initTypeSelection();
     initSearchBar();
-    renderTransactions();
-    updateCards();
+    loadTransactions();
     renderCategories();
     renderCategoriesPage();
 }
