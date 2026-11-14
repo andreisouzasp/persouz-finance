@@ -52,7 +52,7 @@ O **Persouz Finance** é uma aplicação Full Stack focada em simplificar o cont
 ### **1. Back-end (API)**
 ```bash
 # Acesse a pasta do servidor
-cd backend
+cd server
 
 # Instale as dependências
 npm install
@@ -62,7 +62,7 @@ npm run dev
 ```
 
 ### **2. Front-end**
-Abra a pasta `frontend/` utilizando uma extensão de servidor local (como o **Live Server** no VS Code) e acesse `index.html`.
+Abra a pasta `client/` utilizando uma extensão de servidor local (como o **Live Server** no VS Code) e acesse `index.html`.
 
 ---
 
@@ -80,15 +80,15 @@ Abra a pasta `frontend/` utilizando uma extensão de servidor local (como o **Li
 
 ```text
 persouz-finance/
-├── backend/
+├── server/
 │   ├── src/
 │   │   ├── interfaces/
 │   │   │   └── Transaction.ts
 │   │   └── server.ts
 │   ├── package.json
 │   └── tsconfig.json
-├── frontend/
-│   ├── assets/
+├── client/
+│   ├── img/
 │   │   ├── favicon.png
 │   │   └── logo.png
 │   ├── css/
