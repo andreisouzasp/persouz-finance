@@ -6,7 +6,8 @@
    3. Operações de Adição, Edição e Exclusão
    4. Componentes Interativos
    5. Formatadores
-   6. Inicialização
+   6. Autenticação
+   7. Inicialização
    ========================================================================== */
 
 /* ==========================================================================
@@ -36,6 +37,12 @@ const categoryTypeSelect = document.querySelector('#category-type');
 const categoryDeleteButton = document.querySelector('#btn-delete-category');
 const categoryIconPicker = document.querySelector('#category-icon-picker');
 const categoryColorPicker = document.querySelector('#category-color-picker');
+const loginForm = document.querySelector('#auth-form');
+const registerForm = document.querySelector('#register-form');
+const logoutButton = document.querySelector('#logout-btn');
+const userNameElements = document.querySelectorAll('.user-name');
+
+// Ícones e cores das categorias
 const categoryIcons = [
     'fa-tag', 'fa-utensils', 'fa-house', 'fa-car', 'fa-gamepad', 'fa-heart-pulse',
     'fa-graduation-cap', 'fa-plane', 'fa-sack-dollar', 'fa-wallet', 'fa-gift', 'fa-briefcase',
@@ -303,7 +310,7 @@ function updateCards() {
 }
 
 async function loadTransactions() {
-    const response = await fetch(`${apiBaseUrl}/transactions`);
+    const response = await authFetch(`${apiBaseUrl}/transactions`);
 
     if (!response.ok) {
         throw new Error('Erro ao buscar transações');
@@ -315,7 +322,7 @@ async function loadTransactions() {
 }
 
 async function loadCategories() {
-    const response = await fetch(`${apiBaseUrl}/categories`);
+    const response = await authFetch(`${apiBaseUrl}/categories`);
 
     if (!response.ok) {
         throw new Error('Erro ao buscar categorias');
@@ -357,7 +364,7 @@ if(transactionForm) {
             const url = isEditing ? `${apiBaseUrl}/transactions/${editingTransactionId}` : `${apiBaseUrl}/transactions`;
             const method = isEditing ? 'PUT' : 'POST';
 
-            const response = await fetch(url, {
+            const response = await authFetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(transactionData)
@@ -411,7 +418,7 @@ if(categoryForm) {
             const url = isEditing ? `${apiBaseUrl}/categories/${editingCategoryId}` : `${apiBaseUrl}/categories`;
             const method = isEditing ? 'PUT' : 'POST';
 
-            const response = await fetch(url, {
+            const response = await authFetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(categoryData)
@@ -591,7 +598,7 @@ function openDeleteModal(id) {
 
 async function deleteTransaction(id) {
     try {
-        const response = await fetch(`${apiBaseUrl}/transactions/${id}`, { method: 'DELETE' });
+        const response = await authFetch(`${apiBaseUrl}/transactions/${id}`, { method: 'DELETE' });
 
         if (!response.ok) {
             throw new Error('Erro ao excluir transação');
@@ -607,7 +614,7 @@ async function deleteTransaction(id) {
 
 async function deleteCategory(id) {
     try {
-        const response = await fetch(`${apiBaseUrl}/categories/${id}`, { method: 'DELETE' });
+        const response = await authFetch(`${apiBaseUrl}/categories/${id}`, { method: 'DELETE' });
 
         if (!response.ok) {
             let errorMessage = 'Não foi possível excluir a categoria.';
@@ -631,6 +638,90 @@ async function deleteCategory(id) {
 /* ==========================================================================
    4. Componentes Interativos
    ========================================================================== */
+function initAuth() {
+    const user = getStoredUser();
+
+    if (user && user.name) {
+        const firstName = user.name.trim().split(' ')[0];
+        userNameElements.forEach(el => {
+            el.textContent = firstName;
+        });
+    }
+
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logout);
+    }
+
+    document.querySelectorAll('[data-logout]').forEach(button => {
+        button.addEventListener('click', logout);
+    });
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = document.querySelector('#email')?.value?.trim() || '';
+            const password = document.querySelector('#pass')?.value || '';
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data.erro || 'Não foi possível fazer login.');
+                }
+
+                saveSession(data.token, data.user);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error(error);
+                alert(error.message || 'Não foi possível fazer login.');
+            }
+        });
+    }
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const name = document.querySelector('#username')?.value?.trim() || '';
+            const email = document.querySelector('#email')?.value?.trim() || '';
+            const password = document.querySelector('#pass')?.value || '';
+            const confirmPassword = document.querySelector('#confirm-pass')?.value || '';
+
+            if (password !== confirmPassword) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data.erro || 'Não foi possível criar a conta.');
+                }
+
+                saveSession(data.token, data.user);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error(error);
+                alert(error.message || 'Não foi possível criar a conta.');
+            }
+        });
+    }
+}
+
 function initCompactMenu() {
     const btnMenu = document.querySelector('.btn-menu');
     const nav = document.querySelector('.nav');
@@ -893,17 +984,95 @@ function formatCurrency(amount) {
 }
 
 /* ==========================================================================
-   6. Inicialização
+   6. Autenticação
    ========================================================================== */
+
+function isPublicPage() {
+    const path = window.location.pathname;
+    return path.endsWith('login.html') || path.endsWith('register.html');
+}
+
+function getToken() {
+    return localStorage.getItem('persouz_token');
+}
+
+function getStoredUser() {
+    try {
+        const raw = localStorage.getItem('persouz_user');
+        return raw ? JSON.parse(raw) : null;
+    } catch {
+        return null;
+    }
+}
+
+function saveSession(token, user) {
+    localStorage.setItem('persouz_token', token);
+    localStorage.setItem('persouz_user', JSON.stringify(user));
+}
+
+function logout() {
+    localStorage.removeItem('persouz_token');
+    localStorage.removeItem('persouz_user');
+    window.location.href = 'login.html';
+}
+
+function checkAuthGuard() {
+    const token = getToken();
+    const publicPage = isPublicPage();
+
+    if (!token && !publicPage) {
+        window.location.href = 'login.html';
+        return false;
+    }
+
+    if (token && publicPage) {
+        window.location.href = 'index.html';
+        return false;
+    }
+
+    return true;
+}
+
+async function authFetch(url, options = {}) {
+    const token = getToken();
+    const headers = {
+        ...(options.headers || {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+    };
+
+    const response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401) {
+        logout();
+        throw new Error('Sessão expirada. Faça login novamente.');
+    }
+
+    return response;
+}
+
+/* ==========================================================================
+   7. Inicialização
+   ========================================================================== */
+
 async function init() {
+    if (!checkAuthGuard()) return;
+
+    initAuth();
     initCompactMenu();
     initModal();
     initTypeSelection();
     initSearchBar();
     renderCategoryPickers();
 
-    await loadCategories();
-    await loadTransactions();
+    if(!isPublicPage()) {
+        try {
+            await loadCategories();
+            await loadTransactions();
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'Não foi possível carregar os dados da conta.');
+        }
+    }
 }
 
 init();

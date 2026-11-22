@@ -1,8 +1,34 @@
-import express, { type Request, type Response } from 'express';
+/* ==========================================================================
+   PERSOUZ FINANCE - SUMÁRIO (TABLE OF CONTENTS)
+   ==========================================================================
+   1. Configuração e Inicialização
+   2. Autenticação e Usuários
+   3. Transações
+   4. Categorias
+   5. Validações e Middlewares
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Configuração e Inicialização
+   ========================================================================== */
+import express, { type Request, type Response, type NextFunction } from 'express';
 import { type Transaction } from './interfaces/Transaction.js';
 import { type Category } from './interfaces/Category.js';
+import { type User, type PublicUser } from './interfaces/User.js';
 import cors from 'cors';
 import { pool } from './database/db.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+interface AuthRequest extends Request {
+    userId?: number;
+}
+
+interface TokenPayload {
+    id: number;
+    name: string;
+    email: string;
+}
 
 const app = express();
 app.use(cors());
@@ -12,9 +38,140 @@ app.get('/', (req: Request, res: Response) => {
     res.json({ mensagem: 'API do Persouz Finance operante!' });
 });
 
-app.get('/transactions', async (req: Request, res: Response) => {
+const JWT_SECRET = process.env.JWT_SECRET || 'chave_fallback_desenvolvimento';
+
+/* ==========================================================================
+   2. Autenticação e Usuários
+   ========================================================================== */
+
+app.post('/auth/register', async (req: Request, res: Response) => {
+    const { name, email, password } = req.body;
+
+    if (!validateRegisterPayload(req.body)) {
+        res.status(400).json({ erro: 'Preencha nome, e-mail válido e senha com pelo menos 6 caracteres.' });
+        return;
+    }
+
     try {
-        const userId = 1;
+        const cleanName = name.trim();
+        const cleanEmail = email.trim().toLowerCase();
+
+        // Verifica se o e-mail já está cadastrado
+        const existingUser = await pool.query(
+            'SELECT id FROM users WHERE LOWER(email) = LOWER($1)',
+            [cleanEmail]
+        );
+
+        if (existingUser.rows.length > 0) {
+            res.status(409).json({ erro: 'Este e-mail já está em uso.' });
+            return;
+        }
+
+        // Gera o hash seguro da senha (custo 10)
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const insertQuery = `
+            INSERT INTO users (name, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING id, name, email
+        `;
+
+        const result = await pool.query<PublicUser>(insertQuery, [cleanName, cleanEmail, passwordHash]);
+        const newUser = result.rows[0];
+
+        if (!newUser) {
+            res.status(500).json({ erro: 'Erro interno ao criar conta.' });
+            return;
+        }
+
+        const publicUser: PublicUser = {
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email
+        };
+
+        // Gera o token JWT para já autenticar o usuário após o cadastro
+        const token = jwt.sign(
+            { id: newUser.id, name: newUser.name, email: newUser.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({
+            mensagem: 'Conta criada com sucesso!',
+            token,
+            user: publicUser
+        });
+    } catch (error) {
+        console.error('Erro ao registrar usuário:', error);
+        res.status(500).json({ erro: 'Erro interno ao criar conta.' });
+    }
+});
+
+app.post('/auth/login', async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
+        res.status(400).json({ erro: 'Informe e-mail e senha.' });
+        return;
+    }
+
+    try {
+        const cleanEmail = email.trim().toLowerCase();
+
+        const result = await pool.query<User>(
+            'SELECT id, name, email, password_hash FROM users WHERE LOWER(email) = LOWER($1)',
+            [cleanEmail]
+        );
+
+        const user = result.rows[0];
+
+        if (!user || !user.password_hash) {
+            res.status(401).json({ erro: 'E-mail ou senha inválidos.' });
+            return;
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+        if (!isPasswordValid) {
+            res.status(401).json({ erro: 'E-mail ou senha inválidos.' });
+            return;
+        }
+
+        const token = jwt.sign(
+            { id: user.id, name: user.name, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(200).json({
+            mensagem: 'Login realizado com sucesso!',
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao realizar login:', error);
+        res.status(500).json({ erro: 'Erro interno ao realizar login.' });
+    }
+});
+
+/* ==========================================================================
+   3. Transações
+   ========================================================================== */
+
+app.get('/transactions', authenticateToken, async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(401).json({ erro: 'Usuário não autenticado.' });
+        return;
+    }
+
+    try {
         const query = `
             SELECT
                 t.id,
@@ -37,7 +194,14 @@ app.get('/transactions', async (req: Request, res: Response) => {
     }
 });
 
-app.post('/transactions', async (req: Request, res: Response) => {
+app.post('/transactions', authenticateToken, async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(401).json({ erro: 'Usuário não autenticado.' });
+        return;
+    }
+
     const { description, value, type, category, date } = req.body;
 
     if (!validateTransactionPayload(req.body)) {
@@ -46,7 +210,6 @@ app.post('/transactions', async (req: Request, res: Response) => {
     }
 
     try {
-        const userId = 1;
         const categoryId = await findCategoryId(category, type, userId);
 
         if (!categoryId) {
@@ -76,7 +239,14 @@ app.post('/transactions', async (req: Request, res: Response) => {
     }
 });
 
-app.put('/transactions/:id', async (req: Request, res: Response) => {
+app.put('/transactions/:id', authenticateToken, async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(401).json({ erro: 'Usuário não autenticado.' });
+        return;
+    }
+
     const { description, value, type, category, date } = req.body;
     const id = Number(req.params.id);
 
@@ -91,7 +261,6 @@ app.put('/transactions/:id', async (req: Request, res: Response) => {
     }
 
     try {
-        const userId = 1;
         const categoryId = await findCategoryId(category, type, userId);
 
         if (!categoryId) {
@@ -134,7 +303,14 @@ app.put('/transactions/:id', async (req: Request, res: Response) => {
     }
 });
 
-app.delete('/transactions/:id', async (req: Request, res: Response) => {
+app.delete('/transactions/:id', authenticateToken, async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(401).json({ erro: 'Usuário não autenticado.' });
+        return;
+    }
+
     const id = Number(req.params.id);
 
     if (isNaN(id) || id <= 0) {
@@ -143,8 +319,6 @@ app.delete('/transactions/:id', async (req: Request, res: Response) => {
     }
 
     try {
-        const userId = 1;
-
         const result = await pool.query(
             `
                 DELETE FROM transactions t
@@ -178,9 +352,19 @@ app.delete('/transactions/:id', async (req: Request, res: Response) => {
     }
 });
 
-app.get('/categories', async (req: Request, res: Response) => {
+/* ==========================================================================
+   4. Categorias
+   ========================================================================== */
+
+app.get('/categories', authenticateToken, async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(401).json({ erro: 'Usuário não autenticado.' });
+        return;
+    }
+
     try {
-        const userId = 1;
         const query = `
             SELECT id, name, type, user_id, icon, color
             FROM categories
@@ -196,7 +380,14 @@ app.get('/categories', async (req: Request, res: Response) => {
     }
 });
 
-app.post('/categories', async (req: Request, res: Response) => {
+app.post('/categories', authenticateToken, async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(401).json({ erro: 'Usuário não autenticado.' });
+        return;
+    }
+
     const { name, type, icon, color } = req.body;
 
     if (!validateCategoryPayload(req.body)) {
@@ -205,7 +396,6 @@ app.post('/categories', async (req: Request, res: Response) => {
     }
 
     try {
-        const userId = 1;
         const cleanName = name.trim();
         const categoryIcon = typeof icon === 'string' && icon.trim() ? icon.trim() : 'fa-tag';
         const categoryColor = typeof color === 'string' && color.trim() ? color.trim() : '#94a3b8';
@@ -244,7 +434,14 @@ app.post('/categories', async (req: Request, res: Response) => {
     }
 });
 
-app.put('/categories/:id', async (req: Request, res: Response) => {
+app.put('/categories/:id', authenticateToken, async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(401).json({ erro: 'Usuário não autenticado.' });
+        return;
+    }
+
     const id = Number(req.params.id);
     const { name, type, icon, color } = req.body;
 
@@ -259,7 +456,6 @@ app.put('/categories/:id', async (req: Request, res: Response) => {
     }
 
     try {
-        const userId = 1;
         const cleanName = name.trim();
 
         const duplicateCheck = await pool.query(
@@ -300,7 +496,14 @@ app.put('/categories/:id', async (req: Request, res: Response) => {
     }
 });
 
-app.delete('/categories/:id', async (req: Request, res: Response) => {
+app.delete('/categories/:id', authenticateToken, async (req: AuthRequest, res: Response) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        res.status(401).json({ erro: 'Usuário não autenticado.' });
+        return;
+    }
+
     const id = Number(req.params.id);
 
     if (isNaN(id) || id <= 0) {
@@ -309,7 +512,6 @@ app.delete('/categories/:id', async (req: Request, res: Response) => {
     }
 
     try {
-        const userId = 1;
         const result = await pool.query<Category>(
             `DELETE FROM categories
              WHERE id = $1 AND user_id = $2
@@ -348,25 +550,78 @@ app.listen(3000, async () => {
     }
 });
 
+/* ==========================================================================
+   5. Validações e Middlewares
+   ========================================================================== */
+
+function validateRegisterPayload(payload: Record<string, unknown>): boolean {
+    const { name, email, password } = payload;
+
+    const isValidName = typeof name === 'string' && name.trim().length >= 2 && name.trim().length <= 80;
+    const isValidEmail = typeof email === 'string' && email.trim().length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    const isValidPassword = typeof password === 'string' && password.length >= 6 && password.length <= 128;
+
+    return isValidName && isValidEmail && isValidPassword;
+}
+
+function authenticateToken(req: AuthRequest, res: Response, next: NextFunction): void {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        res.status(401).json({ erro: 'Token de autenticação não fornecido.' });
+        return;
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+
+        if (
+            typeof decoded !== 'object' ||
+            decoded === null ||
+            !('id' in decoded) ||
+            typeof decoded.id !== 'number' ||
+            !Number.isInteger(decoded.id) ||
+            decoded.id <= 0
+        ) {
+            res.status(401).json({ erro: 'Token inválido ou expirado.' });
+            return;
+        }
+
+        const payload: TokenPayload = {
+            id: decoded.id,
+            name: typeof decoded.name === 'string' ? decoded.name : '',
+            email: typeof decoded.email === 'string' ? decoded.email : ''
+        };
+
+        req.userId = payload.id;
+        next();
+    } catch {
+        res.status(401).json({ erro: 'Token inválido ou expirado.' });
+    }
+}
+
 function validateTransactionPayload(payload: Record<string, unknown>): boolean {
     const { description, value, type, category, date } = payload;
 
-    const isValidDescription = typeof description === 'string' && description.trim().length > 0;
-    const isValidValue = typeof value === 'number' && !Number.isNaN(value) && value > 0;
+    const isValidDescription = typeof description === 'string' && description.trim().length > 0 && description.trim().length <= 200;
+    const isValidValue = typeof value === 'number' && Number.isFinite(value) && value > 0 && value <= 999999999;
     const isValidType = type === 'income' || type === 'expense';
-    const isValidCategory = typeof category === 'string' && category.trim().length > 0;
-    const isValidDate = typeof date === 'string' && date.trim().length > 0;
+    const isValidCategory = typeof category === 'string' && category.trim().length > 0 && category.trim().length <= 80;
+    const isValidDate = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date);
 
     return isValidDescription && isValidValue && isValidType && isValidCategory && isValidDate;
 }
 
 function validateCategoryPayload(payload: Record<string, unknown>): boolean {
-    const { name, type } = payload;
+    const { name, type, icon, color } = payload;
 
-    const isValidName = typeof name === 'string' && name.trim().length > 0;
+    const isValidName = typeof name === 'string' && name.trim().length > 0 && name.trim().length <= 80;
     const isValidType = type === 'income' || type === 'expense';
+    const isValidIcon = icon === undefined || (typeof icon === 'string' && /^fa-[a-z0-9-]+$/.test(icon));
+    const isValidColor = color === undefined || (typeof color === 'string' && /^#[0-9a-fA-F]{6}$/.test(color));
 
-    return isValidName && isValidType;
+    return isValidName && isValidType && isValidIcon && isValidColor;
 }
 
 async function findCategoryId(name: string, type: string, userId: number): Promise<number | null> {

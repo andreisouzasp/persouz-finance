@@ -43,7 +43,16 @@
         <!-- Informações do Usuário -->
         <div class="user-info">
             <div class="user-icon"><i class="fa-solid fa-user"></i></div>
-            <span>Olá, <span class="user-name">Andrei</span>!</span>
+            <span>Olá, <span class="user-name">Usuário</span>!</span>
+            <button type="button" id="logout-btn" class="btn-icon btn-delete" title="Sair da conta" aria-label="Sair da conta">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+
+        <div class="compact-actions">
+            <button type="button" class="compact-logout-btn" data-logout title="Sair da conta" aria-label="Sair da conta">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
         </div>
     </header>
 
@@ -70,10 +79,10 @@
     </main>
 
     <!-- Estrutura do Modal (Oculto por padrão) -->
-    <div id="modal" class="modal-overlay">
-        <div class="modal-content">
+    <div id="modal" class="modal-overlay" role="presentation">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
             <div class="modal-header">
-                <h3>Adicionar Categoria</h3>
+                <h3 id="category-modal-title">Adicionar Categoria</h3>
                 <button type="button" id="close-modal-btn" class="modal-close" aria-label="Fechar modal">
                     <i class="fa-solid fa-xmark"></i>
                 </button>

@@ -43,7 +43,17 @@
         <!-- Informações do Usuário -->
         <div class="user-info">
             <div class="user-icon"><i class="fa-solid fa-user"></i></div>
-            <span>Olá, <span class="user-name">Andrei</span>!</span>
+            <span>Olá, <span class="user-name">Usuário</span>!</span>
+            <button type="button" id="logout-btn" class="btn-icon btn-delete" title="Sair da conta" aria-label="Sair da conta">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+
+        <!-- Ações Compactadas -->
+        <div class="compact-actions">
+            <button type="button" class="compact-logout-btn" data-logout title="Sair da conta" aria-label="Sair da conta">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
         </div>
     </header>
 
@@ -73,10 +83,8 @@
         <section class="content-block">
             <article class="dashboard-transactions-header">
                 <h3>Últimas Transações</h3>
-                <a href="transactions.html">
-                    <button type="button" class="btn-primary btn-small">
-                        <i class="fa-solid fa-list"></i> Exibir mais
-                    </button>
+                <a href="transactions.html" class="btn-primary btn-small">
+                    <i class="fa-solid fa-list"></i> Exibir mais
                 </a>
             </article>
 
