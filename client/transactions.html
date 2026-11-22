@@ -63,12 +63,12 @@
             <!-- Barra de Pesquisa -->
             <article class="search-block">
                 <i class="fa-solid fa-search"></i>
-                <input type="text" placeholder="Pesquisar" class="search-input" id="search"></input>
+                <input type="text" placeholder="Pesquisar" class="search-input" id="search">
             </article>
 
-            <!-- Botão para Adicionar Transação-->
-            <button type="button" id="open-modal-btn" class="btn-primary btn-add-transaction">
-                <i class="fa-solid fa-plus"></i> Adicionar
+            <!-- Botão para Adicionar Transação -->
+            <button type="button" id="open-modal-btn" class="btn-primary btn-small">
+                <i class="fa-solid fa-plus"></i> Nova Transação
             </button>
         </section>
 
@@ -79,7 +79,7 @@
     </main>
 
     <!-- Estrutura do Modal (Oculto por padrão) -->
-    <div id="transaction-modal" class="modal-overlay">
+    <div id="modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Adicionar Transação</h3>
@@ -117,7 +117,7 @@
                     <input type="date" id="date" name="date" required>
                 </div>
 
-                <button type="submit" class="btn-primary">Salvar Transação</button>
+                <button type="submit" class="btn-primary">Confirmar</button>
             </form>
         </div>
     </div>

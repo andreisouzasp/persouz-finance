@@ -12,67 +12,65 @@
 /* ==========================================================================
    1. Variáveis Globais e Seletores
    ========================================================================== */
-const API_URL = "http://localhost:3000/transactions";
+const apiBaseUrl = 'http://localhost:3000';
 const balanceCard = document.querySelector('#balance-card .card-value');
 const incomeCard = document.querySelector('#income-card .card-value');
 const expenseCard = document.querySelector('#expense-card .card-value');
 const dashboardTransactions = document.querySelector('#dashboard-transactions ul');
 const fullTransactions = document.querySelector('#full-transactions');
-const modalOverlay = document.querySelector('#transaction-modal');
+const modalOverlay = document.querySelector('#modal');
 const modalTitle = document.querySelector('.modal-header h3');
 const transactionForm = document.querySelector('#transaction-form');
 const descriptionInput = document.querySelector('#desc');
 const valueInput = document.querySelector('#amount');
 const typeSelect = document.querySelector('#type');
-const categorySelect = document.querySelector('#category');
 const dateInput = document.querySelector('#date');
 const allTypeButton = document.querySelector('#btn-type-all');
 const incomeTypeButton = document.querySelector('#btn-type-income');
 const expenseTypeButton = document.querySelector('#btn-type-expense');
 const searchInput = document.querySelector('#search');
-
-// Armazena as transações
-let transactions = [];
-
-// Lista de categorias disponíveis para classificação das transações
-let categories = [
-    // Despesas
-    {name: 'Alimentação', type: 'expense', icon: 'fa-utensils', color: '#f97316'}, // Laranja
-    {name: 'Assinaturas', type: 'expense', icon: 'fa-file-invoice-dollar', color: '#a855f7'}, // Roxo
-    {name: 'Casa', type: 'expense', icon: 'fa-house', color: '#14b8a6'}, // Teal (Verde-azulado)
-    {name: 'Compras', type: 'expense', icon: 'fa-cart-shopping', color: '#ec4899'}, // Rosa
-    {name: 'Dívidas', type: 'expense', icon: 'fa-hand-holding-dollar', color: '#ef4444'}, // Vermelho
-    {name: 'Educação', type: 'expense', icon: 'fa-book-open', color: '#3b82f6'}, // Azul
-    {name: 'Empresarial', type: 'expense', icon: 'fa-briefcase', color: '#64748b'}, // Slate (Cinza-azulado)
-    {name: 'Investimento', type: 'expense', icon: 'fa-chart-line', color: '#10b981'}, // Esmeralda
-    {name: 'Lazer', type: 'expense', icon: 'fa-gamepad', color: '#eab308'}, // Amarelo
-    {name: 'Pessoal', type: 'expense', icon: 'fa-user', color: '#6366f1'}, // Indigo
-    {name: 'Pet', type: 'expense', icon: 'fa-paw', color: '#d97706'}, // Âmbar
-    {name: 'Saúde', type: 'expense', icon: 'fa-heart-pulse', color: '#f43f5e'}, // Rose
-    {name: 'Serviços', type: 'expense', icon: 'fa-screwdriver-wrench', color: '#06b6d4'}, // Ciano
-    {name: 'Taxas', type: 'expense', icon: 'fa-percent', color: '#71717a'}, // Cinza
-    {name: 'Transferências', type: 'expense', icon: 'fa-right-left', color: '#0ea5e9'}, // Azul claro
-    {name: 'Transporte', type: 'expense', icon: 'fa-bus', color: '#f59e0b'}, // Amarelo-laranja
-    {name: 'Vestuário', type: 'expense', icon: 'fa-shirt', color: '#d946ef'}, // Fuchsia
-    {name: 'Viagem', type: 'expense', icon: 'fa-plane', color: '#38bdf8'}, // Sky (Azul céu)
-
-    // Receitas
-    {name: 'Cashback', type: 'income', icon: 'fa-money-bill-wave', color: '#10b981'}, // Esmeralda
-    {name: 'Fatura', type: 'income', icon: 'fa-file-invoice-dollar', color: '#3b82f6'}, // Azul
-    {name: 'Presente', type: 'income', icon: 'fa-gift', color: '#ec4899'}, // Rosa
-    {name: 'Prêmio', type: 'income', icon: 'fa-trophy', color: '#eab308'}, // Amarelo
-    {name: 'Receitas variáveis', type: 'income', icon: 'fa-wallet', color: '#14b8a6'}, // Teal
-    {name: 'Renda extra', type: 'income', icon: 'fa-briefcase', color: '#f97316'}, // Laranja
-    {name: 'Salário', type: 'income', icon: 'fa-sack-dollar', color: '#34d399'}, // Verde Persouz
-    {name: 'Transferências', type: 'income', icon: 'fa-right-left', color: '#0ea5e9'}, // Azul claro
-    {name: 'Outros', type: 'income', icon: 'fa-ellipsis', color: '#94a3b8'} // Slate claro
+const categorySelect = document.querySelector('#category');
+const categoryForm = document.querySelector('#category-form');
+const categoryNameInput = document.querySelector('#category-name');
+const categoryTypeSelect = document.querySelector('#category-type');
+const categoryDeleteButton = document.querySelector('#btn-delete-category');
+const categoryIconPicker = document.querySelector('#category-icon-picker');
+const categoryColorPicker = document.querySelector('#category-color-picker');
+const categoryIcons = [
+    'fa-tag', 'fa-utensils', 'fa-house', 'fa-car', 'fa-gamepad', 'fa-heart-pulse',
+    'fa-graduation-cap', 'fa-plane', 'fa-sack-dollar', 'fa-wallet', 'fa-gift', 'fa-briefcase',
+    'fa-cart-shopping', 'fa-shirt', 'fa-paw', 'fa-basketball', 'fa-dumbbell', 'fa-bicycle',
+    'fa-bus', 'fa-train', 'fa-bed', 'fa-building', 'fa-tree', 'fa-leaf',
+    'fa-film', 'fa-music', 'fa-book', 'fa-camera', 'fa-mobile-screen', 'fa-laptop',
+    'fa-wifi', 'fa-phone', 'fa-baby', 'fa-person-running', 'fa-pills', 'fa-stethoscope'
 ];
+const categoryColors = [
+    '#94a3b8', '#8b5cf6', '#f43f5e', '#f59e0b', '#34d399', '#3b82f6',
+    '#9333ea', '#ef4444', '#22c55e', '#2563eb', '#a855f7', '#f97316',
+    '#eab308', '#14b8a6', '#06b6d4', '#ec4899', '#64748b', '#78716c',
+    '#84cc16', '#10b981', '#0ea5e9', '#6366f1', '#d946ef', '#fb7185',
+    '#facc15', '#fb923c', '#a3e635', '#2dd4bf', '#38bdf8', '#c084fc'
+];
+
+// Armazena as transações e categorias
+let transactions = [];
+let categories = [];
 
 // Armazena o ID da transação em edição
 let editingTransactionId = null;
 
 // Armazena o ID da transação pendente de exclusão
 let pendingDeleteTransactionId = null;
+
+// Armazena o ID da categoria em edição
+let editingCategoryId = null;
+
+// Armazena o ID da categoria pendente de exclusão
+let pendingDeleteCategoryId = null;
+
+// Guarda a aparência selecionada para uma categoria
+let selectedCategoryIcon = 'fa-tag';
+let selectedCategoryColor = '#94a3b8';
 
 // Armazena a opção selecionada nos botões de Tipo
 let selectedTypeButton = 'all';
@@ -148,7 +146,9 @@ function renderTransactions(type = 'all', search = '') {
         // Categoria
         const categoryIcon = document.createElement('i');
         const categoryCell = document.createElement('div');
-        const matchedCategory = categories.find(cat => cat.name === transaction.category);
+        const matchedCategory = categories.find(
+            cat => cat.name === transaction.category && cat.type === transaction.type
+        );
         const iconClass = matchedCategory ? matchedCategory.icon : 'fa-tag';
         const iconColor = matchedCategory ? matchedCategory.color : '#94a3b8'; 
         categoryIcon.className = `fa-solid ${iconClass}`;
@@ -256,19 +256,27 @@ function renderCategoriesPage() {
     categories.forEach(category => {
         const card = document.createElement('div');
         card.className = `category-card`;
-
-        // Injeta a cor como uma variável CSS no card para usarmos no style.css
         card.style.setProperty('--cat-color', category.color);
+        card.onclick = () => openCategoryModal(category);
 
         const icon = document.createElement('i');
         icon.className = `fa-solid ${category.icon}`;
-        // Aplica a cor diretamente no ícone
         icon.style.color = category.color;
 
         const name = document.createElement('span');
         name.textContent = category.name;
 
         card.append(icon, name);
+
+        if(category.user_id !== null) {
+            const editIcon = document.createElement('i');
+            editIcon.className = 'fa-solid fa-pencil';
+            editIcon.style.cssText = 'position:absolute;top:8px;right:8px;opacity:0;transition:opacity 0.2s ease;pointer-events:none;font-size:0.75rem;';
+            card.style.position = 'relative';
+            card.append(editIcon);
+            card.addEventListener('mouseenter', () => editIcon.style.opacity = '1');
+            card.addEventListener('mouseleave', () => editIcon.style.opacity = '0');
+        }
 
         if(category.type === 'expense') {
             expenseContainer.append(card);
@@ -295,15 +303,27 @@ function updateCards() {
 }
 
 async function loadTransactions() {
-    try {
-        const response = await fetch(API_URL);
-        if (!response.ok) throw new Error("Erro ao buscar transações");
-        transactions = await response.json();
-        renderTransactions();
-        updateCards();
-    } catch (error) {
-        console.error(error);
+    const response = await fetch(`${apiBaseUrl}/transactions`);
+
+    if (!response.ok) {
+        throw new Error('Erro ao buscar transações');
     }
+
+    transactions = await response.json();
+    updateCards();
+    renderTransactions(selectedTypeButton, searchTextContent);
+}
+
+async function loadCategories() {
+    const response = await fetch(`${apiBaseUrl}/categories`);
+
+    if (!response.ok) {
+        throw new Error('Erro ao buscar categorias');
+    }
+
+    categories = await response.json();
+    renderCategories();
+    renderCategoriesPage();
 }
 
 /* ==========================================================================
@@ -334,17 +354,17 @@ if(transactionForm) {
 
         try {
             const isEditing = editingTransactionId !== null;
-            const url = isEditing ? `${API_URL}/${editingTransactionId}` : API_URL;
-            const method = isEditing ? "PUT" : "POST";
+            const url = isEditing ? `${apiBaseUrl}/transactions/${editingTransactionId}` : `${apiBaseUrl}/transactions`;
+            const method = isEditing ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(transactionData)
             });
 
             if (!response.ok) {
-                let errorMessage = "Erro ao salvar transação";
+                let errorMessage = 'Erro ao salvar transação';
                 try {
                     const errorData = await response.json();
                     errorMessage = errorData.erro || errorMessage;
@@ -367,10 +387,65 @@ if(transactionForm) {
     });
 }
 
+if(categoryForm) {
+    categoryForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const name = categoryNameInput?.value?.trim() || '';
+        const type = categoryTypeSelect?.value || '';
+
+        if(!name || !type) {
+            alert('Preencha todos os campos corretamente antes de salvar a categoria.');
+            return;
+        }
+
+        const categoryData = {
+            name,
+            type,
+            icon: selectedCategoryIcon,
+            color: selectedCategoryColor
+        };
+
+        try {
+            const isEditing = editingCategoryId !== null;
+            const url = isEditing ? `${apiBaseUrl}/categories/${editingCategoryId}` : `${apiBaseUrl}/categories`;
+            const method = isEditing ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(categoryData)
+            });
+
+            if (!response.ok) {
+                let errorMessage = 'Erro ao salvar categoria';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.erro || errorMessage;
+                } catch {
+                    // Ignora erro ao parsear resposta vazia ou não JSON
+                }
+                throw new Error(errorMessage);
+            }
+
+        await loadCategories();
+        closeModal();
+        } catch (error) {
+            console.error(error);
+            alert(error.message || 'Não foi possível salvar a categoria.');
+        }
+    });
+}
+
 function showTransactionForm() {
     if(transactionForm) transactionForm.style.display = 'block';
     const deleteConfirmation = document.querySelector('.delete-confirmation');
     if(deleteConfirmation) deleteConfirmation.style.display = 'none';
+}
+
+function showCategoryForm() {
+    if(categoryForm) categoryForm.style.display = 'block';
+    if(categoryDeleteButton) categoryDeleteButton.style.display = 'none';
 }
 
 function ensureDeleteConfirmation() {
@@ -378,11 +453,21 @@ function ensureDeleteConfirmation() {
 
     let deleteConfirmation = document.querySelector('.delete-confirmation');
 
-    if(!deleteConfirmation) {
+    if(deleteConfirmation) {
+        if(modalTitle) modalTitle.textContent = 'Confirmar exclusão';
+        modalOverlay.classList.add('active');
+
+        const message = deleteConfirmation.querySelector('p');
+        if(message) {
+            message.textContent = pendingDeleteTransactionId !== null
+                ? 'Deseja realmente excluir esta transação?'
+                : 'Deseja realmente excluir esta categoria?';
+        }
+    } else {
         deleteConfirmation = document.createElement('div');
         deleteConfirmation.className = 'delete-confirmation';
         const message = document.createElement('p');
-        message.textContent = 'Deseja realmente excluir esta transação?';
+        message.textContent = `Deseja realmente excluir esta ${(pendingDeleteTransactionId) ? 'transação' : 'categoria'}?`;
 
         const actions = document.createElement('div');
         actions.className = 'modal-actions';
@@ -410,6 +495,14 @@ function ensureDeleteConfirmation() {
             || modalOverlay.querySelector('.modal-card')
             || modalOverlay;
 
+        if(modalTitle) {
+            modalTitle.textContent = 'Confirmar exclusão';
+        }
+
+        if(modalOverlay) {
+            modalOverlay.classList.add('active');
+        }
+
         if(deleteConfirmation.parentElement !== modalContent) {
             modalContent.appendChild(deleteConfirmation);
         }
@@ -419,9 +512,13 @@ function ensureDeleteConfirmation() {
         });
 
         deleteConfirmation.querySelector('.btn-confirm-delete').addEventListener('click', async () => {
-            if(pendingDeleteTransactionId === null) return;
+            if(pendingDeleteTransactionId === null && pendingDeleteCategoryId === null) return;
 
-            await deleteTransaction(pendingDeleteTransactionId);
+            if(pendingDeleteTransactionId)
+                await deleteTransaction(pendingDeleteTransactionId);
+            else if(pendingDeleteCategoryId)
+                await deleteCategory(pendingDeleteCategoryId);
+
             closeModal();
         });
     }
@@ -445,35 +542,89 @@ function openEditModal(transaction) {
     if(modalOverlay) modalOverlay.classList.add('active');
 }
 
+function openCategoryModal(category) {
+    if(category.user_id === null) {
+        alert('Categorias padrão não podem ser editadas ou removidas.');
+        return;
+    }
+
+    editingCategoryId = category.id;
+    showCategoryForm();
+
+    if(modalTitle) modalTitle.textContent = 'Editar Categoria';
+
+    categoryNameInput.value = category.name;
+    categoryTypeSelect.value = category.type;
+    selectedCategoryIcon = category.icon || 'fa-tag';
+    selectedCategoryColor = category.color || '#94a3b8';
+    renderCategoryPickers();
+    categoryDeleteButton.style.display = 'block';
+    categoryDeleteButton.onclick = () => {
+        pendingDeleteCategoryId = category.id;
+        pendingDeleteTransactionId = null;
+        if(categoryForm) categoryForm.style.display = 'none';
+        const deleteConfirmation = ensureDeleteConfirmation();
+        if(deleteConfirmation) deleteConfirmation.style.display = 'block';
+    };
+
+    if(modalOverlay) modalOverlay.classList.add('active');
+}
+
 function openDeleteModal(id) {
     pendingDeleteTransactionId = id;
+    pendingDeleteCategoryId = null;
     editingTransactionId = null;
 
     if(transactionForm) transactionForm.style.display = 'none';
 
+    if(modalTitle) modalTitle.textContent = 'Confirmar exclusão';
+
     const deleteConfirmation = ensureDeleteConfirmation();
     if(deleteConfirmation) {
+        const message = deleteConfirmation.querySelector('p');
+        if(message) message.textContent = 'Deseja realmente excluir esta transação?';
         deleteConfirmation.style.display = 'block';
     }
-
-    if(modalTitle) modalTitle.textContent = 'Confirmar exclusão';
 
     if(modalOverlay) modalOverlay.classList.add('active');
 }
 
 async function deleteTransaction(id) {
     try {
-        const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        const response = await fetch(`${apiBaseUrl}/transactions/${id}`, { method: 'DELETE' });
 
         if (!response.ok) {
-            throw new Error("Erro ao excluir transação");
+            throw new Error('Erro ao excluir transação');
         }
 
         await loadTransactions();
         pendingDeleteTransactionId = null;
     } catch (error) {
         console.error(error);
-        alert("Não foi possível excluir a transação.");
+        alert('Não foi possível excluir a transação.');
+    }
+}
+
+async function deleteCategory(id) {
+    try {
+        const response = await fetch(`${apiBaseUrl}/categories/${id}`, { method: 'DELETE' });
+
+        if (!response.ok) {
+            let errorMessage = 'Não foi possível excluir a categoria.';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.erro || errorMessage;
+            } catch {
+                // Mantém a mensagem padrão quando a resposta não contém JSON.
+            }
+            throw new Error(errorMessage);
+        }
+
+        await loadCategories();
+        pendingDeleteCategoryId = null;
+    } catch (error) {
+        console.error(error);
+        alert(error.message || 'Não foi possível excluir a categoria.');
     }
 }
 
@@ -507,7 +658,7 @@ function toggleMenuIcon(iconElement, isActive) {
     iconElement.className = isActive ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
 }
 
-function initTransactionModal() {
+function initModal() {
     const openBtn = document.getElementById('open-modal-btn');
     const closeBtn = document.getElementById('close-modal-btn');
     
@@ -518,8 +669,10 @@ function initTransactionModal() {
             editingTransactionId = null;
             pendingDeleteTransactionId = null;
             showTransactionForm();
-            if(modalTitle) modalTitle.textContent = 'Adicionar Transação';
+            showCategoryForm();
+            if(modalTitle) modalTitle.textContent = (transactionForm) ? 'Nova Transação' : 'Nova Categoria';
             if(transactionForm) transactionForm.reset();
+            if(categoryForm) categoryForm.reset();
 
             // Define a data de hoje como padrão (formato YYYY-MM-DD)
             if(dateInput) {
@@ -556,6 +709,13 @@ function closeModal() {
         transactionForm.style.display = 'block';
     }
 
+    if(categoryForm) {
+        categoryForm.reset();
+        categoryForm.style.display = 'block';
+    }
+
+    if(categoryDeleteButton) categoryDeleteButton.style.display = 'none';
+
     if(categorySelect) {
         categorySelect.innerHTML = '';
     }
@@ -564,7 +724,12 @@ function closeModal() {
     if(deleteConfirmation) deleteConfirmation.style.display = 'none';
 
     editingTransactionId = null;
+    editingCategoryId = null;
     pendingDeleteTransactionId = null;
+    pendingDeleteCategoryId = null;
+    selectedCategoryIcon = 'fa-tag';
+    selectedCategoryColor = '#94a3b8';
+    renderCategoryPickers();
 }
 
 function initTypeSelection() {
@@ -611,6 +776,49 @@ function initSearchBar() {
         searchTextContent = event.target.value;
         renderTransactions(selectedTypeButton, searchTextContent);
     })
+}
+
+function renderCategoryPickers() {
+    if(categoryIconPicker) {
+        categoryIconPicker.innerHTML = '';
+
+        categoryIcons.forEach(icon => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `icon-picker-option${icon === selectedCategoryIcon ? ' active' : ''}`;
+            button.title = icon;
+
+            const iconElement = document.createElement('i');
+            iconElement.className = `fa-solid ${icon}`;
+            button.append(iconElement);
+
+            button.addEventListener('click', () => {
+                selectedCategoryIcon = icon;
+                renderCategoryPickers();
+            });
+
+            categoryIconPicker.append(button);
+        });
+    }
+
+    if(categoryColorPicker) {
+        categoryColorPicker.innerHTML = '';
+
+        categoryColors.forEach(color => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `color-picker-option${color === selectedCategoryColor ? ' active' : ''}`;
+            button.style.setProperty('--picker-color', color);
+            button.title = color;
+
+            button.addEventListener('click', () => {
+                selectedCategoryColor = color;
+                renderCategoryPickers();
+            });
+
+            categoryColorPicker.append(button);
+        });
+    }
 }
 
 /* ==========================================================================
@@ -687,14 +895,15 @@ function formatCurrency(amount) {
 /* ==========================================================================
    6. Inicialização
    ========================================================================== */
-function init() {
+async function init() {
     initCompactMenu();
-    initTransactionModal();
+    initModal();
     initTypeSelection();
     initSearchBar();
-    loadTransactions();
-    renderCategories();
-    renderCategoriesPage();
+    renderCategoryPickers();
+
+    await loadCategories();
+    await loadTransactions();
 }
 
 init();

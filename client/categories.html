@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persouz Finance - Visão Geral</title>
+    <title>Persouz Finance - Categorias</title>
 
     <!-- Meta tags para SEO e Compartilhamento (Open Graph) -->
     <meta name="description" content="Controle suas finanças de forma simples e inteligente.">
@@ -51,8 +51,13 @@
     <main class="container">
         <h1 class="sr-only">Categorias</h1>
 
+        <!-- Botão para Adicionar Categoria -->
+        <button type="button" id="open-modal-btn" class="btn-primary btn-small">
+            <i class="fa-solid fa-plus"></i> Nova Categoria
+        </button>
+
         <!-- Seção: Despesas -->
-        <section class="content-block" style="margin-top: 0;">
+        <section class="content-block">
             <h2><i class="fa-solid fa-arrow-down txt-expense"></i> Categorias de Despesas</h2>
             <div class="categories-grid" id="expense-categories"></div>
         </section>
@@ -63,6 +68,48 @@
             <div class="categories-grid" id="income-categories"></div>
         </section>
     </main>
+
+    <!-- Estrutura do Modal (Oculto por padrão) -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adicionar Categoria</h3>
+                <button type="button" id="close-modal-btn" class="modal-close" aria-label="Fechar modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="category-form">
+                <div class="form-group">
+                    <label for="category-name">Nome</label>
+                    <input type="text" id="category-name" name="desc" placeholder="Digite o nome da categoria" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category-type">Tipo</label>
+                    <select id="category-type" name="type" required>
+                        <option value="expense" selected>Despesa</option>
+                        <option value="income">Receita</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Ícone</label>
+                    <div class="icon-picker" id="category-icon-picker"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Cor</label>
+                    <div class="color-picker" id="category-color-picker"></div>
+                </div>
+
+                <div class="form-btns">
+                    <button type="submit" class="btn-primary">Confirmar</button>
+                    <button type="button" id="btn-delete-category" class="btn-primary btn-delete">Excluir</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Rodapé -->
     <footer class="footer">
