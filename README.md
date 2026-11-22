@@ -20,7 +20,7 @@
 
 ## 📌 Sobre o Projeto
 
-O **Persouz Finance** é uma aplicação Full Stack multiusuário focada em simplificar o controle financeiro diário de forma inteligente, segura e sem atritos. O projeto conta com arquitetura cliente-servidor completa, API REST tipada em TypeScript, autenticação via JWT com criptografia de senhas e persistência relacional em PostgreSQL.
+O **Persouz Finance** é uma aplicação Full Stack multiusuário focada em simplificar o controle financeiro diário de forma inteligente, segura e sem atritos. O projeto conta com arquitetura cliente-servidor completa, API REST em camadas tipada em TypeScript, autenticação via JWT com criptografia de senhas e persistência relacional em PostgreSQL.
 
 ---
 
@@ -45,7 +45,7 @@ O **Persouz Finance** é uma aplicação Full Stack multiusuário focada em simp
 - **JavaScript (ES6+):** Manipulação dinâmica da DOM, modais interativos, controle de sessão e requisições autenticadas (`Fetch API`).
 
 ### **Back-end**
-- **Node.js & Express:** Criação do servidor HTTP, middlewares de autenticação e roteamento REST.
+- **Node.js & Express:** Criação do servidor HTTP, middlewares de autenticação e roteamento REST organizado em camadas (`routes`, `controllers`, `repositories` e `middlewares`).
 - **TypeScript:** Tipagem estática, interfaces (`User`, `PublicUser`, `Transaction`, `Category`) e validação de contratos e payloads em runtime.
 - **PostgreSQL (`pg`):** Banco de dados relacional com pool de conexões configurado e consultas SQL parametrizadas.
 - **Bcrypt & JSON Web Token (JWT):** Hashing seguro de senhas e autenticação stateless baseada em tokens.
@@ -91,7 +91,7 @@ Abra a pasta `client/` utilizando uma extensão de servidor local (como o **Live
 - [x] **Banco de Dados:** Persistência definitiva com **PostgreSQL**.
 - [x] **Categorias Personalizadas:** Endpoints e interface para gerenciamento dinâmico de categorias com ícones e cores.
 - [x] **Autenticação:** Sistema seguro de Login e Cadastro (`login.html` e `register.html` com `bcrypt` e `JWT`).
-- [ ] **Arquitetura em Camadas:** Refatoração do back-end em `routes`, `controllers`, `repositories` e `middlewares`.
+- [x] **Arquitetura em Camadas:** Refatoração do back-end em `routes`, `controllers`, `repositories` e `middlewares`.
 - [ ] **Análise Mensal & Gráficos:** Filtros por período e visualização de despesas por categoria.
 
 ---
@@ -102,12 +102,30 @@ Abra a pasta `client/` utilizando uma extensão de servidor local (como o **Live
 persouz-finance/
 ├── server/
 │   ├── src/
+│   │   ├── config/
+│   │   │   └── env.ts
+│   │   ├── controllers/
+│   │   │   ├── authController.ts
+│   │   │   ├── categoryController.ts
+│   │   │   └── transactionController.ts
 │   │   ├── database/
 │   │   │   └── db.ts
 │   │   ├── interfaces/
 │   │   │   ├── Category.ts
 │   │   │   ├── Transaction.ts
 │   │   │   └── User.ts
+│   │   ├── middlewares/
+│   │   │   └── authMiddleware.ts
+│   │   ├── repositories/
+│   │   │   ├── categoryRepository.ts
+│   │   │   ├── transactionRepository.ts
+│   │   │   └── userRepository.ts
+│   │   ├── routes/
+│   │   │   ├── authRoutes.ts
+│   │   │   ├── categoryRoutes.ts
+│   │   │   └── transactionRoutes.ts
+│   │   ├── utils/
+│   │   │   └── validators.ts
 │   │   └── server.ts
 │   ├── .env
 │   ├── package.json
