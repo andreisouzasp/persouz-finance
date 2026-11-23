@@ -18,6 +18,7 @@
 
     <!-- Scripts (Defer para carregar após o HTML) -->
     <script src="js/script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
 <body>
     <!-- Cabeçalho Principal -->
@@ -77,6 +78,28 @@
                 <h2 class="card-header">Despesas</h2>
                 <p class="card-value txt-expense">- R$ 0,00</p>
             </article>
+        </section>
+
+        <!-- Seção: Análise de Despesas por Categoria -->
+        <section class="content-block analytics-section" aria-label="Despesas por Categoria">
+            <div class="section-header-inline">
+                <div>
+                    <h3>Despesas por Categoria</h3>
+                    <p class="section-subtitle">Distribuição dos seus gastos registrados</p>
+                </div>
+            </div>
+
+            <div class="analytics-grid" id="expenses-analytics-content">
+                <div class="chart-wrapper">
+                    <canvas id="expenses-chart"></canvas>
+                </div>
+                <div class="category-breakdown" id="expenses-breakdown"></div>
+            </div>
+
+            <div class="empty-list-item" id="expenses-chart-empty" style="display: none;">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Nenhuma despesa registrada para gerar o gráfico</span>
+            </div>
         </section>
 
         <!-- Seção: Últimas Transações -->

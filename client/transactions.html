@@ -76,6 +76,15 @@
                 <input type="text" placeholder="Pesquisar" class="search-input" id="search">
             </article>
 
+            <!-- Filtro por Período (Mês/Ano) -->
+            <article class="date-filter-block">
+                <i class="fa-solid fa-calendar-days"></i>
+                <input type="month" id="filter-month" class="date-filter-input" aria-label="Filtrar por mês e ano">
+                <button type="button" id="btn-clear-month" class="btn-clear-date" title="Mostrar todos os meses" aria-label="Limpar filtro de data" style="display: none;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </article>
+
             <!-- Botão para Adicionar Transação -->
             <button type="button" id="open-modal-btn" class="btn-primary btn-small">
                 <i class="fa-solid fa-plus"></i> Nova Transação

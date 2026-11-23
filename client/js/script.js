@@ -41,6 +41,12 @@ const loginForm = document.querySelector('#auth-form');
 const registerForm = document.querySelector('#register-form');
 const logoutButton = document.querySelector('#logout-btn');
 const userNameElements = document.querySelectorAll('.user-name');
+const monthFilterInput = document.querySelector('#filter-month');
+const clearMonthButton = document.querySelector('#btn-clear-month');
+const expensesChartCanvas = document.querySelector('#expenses-chart');
+const expensesBreakdown = document.querySelector('#expenses-breakdown');
+const expensesAnalyticsContent = document.querySelector('#expenses-analytics-content');
+const expensesChartEmpty = document.querySelector('#expenses-chart-empty');
 
 // Ícones e cores das categorias
 const categoryIcons = [
@@ -85,39 +91,53 @@ let selectedTypeButton = 'all';
 // Armazena o texto na barra de pesquisa
 let searchTextContent = '';
 
+// Armazena o mês selecionado do filtro de transações e gráfico
+let selectedMonth = '';
+let expensesChartInstance = null;
+
 /* ==========================================================================
    2. Renderização do DOM
    ========================================================================== */
-function renderTransactions(type = 'all', search = '') {
+function renderTransactions(type = 'all', search = '', month = '') {
     const targetContainer = fullTransactions || dashboardTransactions;
     let currentDate = null;
 
-    if(!targetContainer) return;
+    if (!targetContainer) return;
 
     targetContainer.innerHTML = '';
 
-    // Ordena todas as transações por data
-    let filtered = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+    // No Dashboard, mantém as últimas adicionadas (maior ID); no histórico completo, ordena por data
+    let filtered = [...transactions].sort((a, b) => {
+        if (dashboardTransactions) {
+            return b.id - a.id;
+        }
+        return new Date(b.date) - new Date(a.date) || b.id - a.id;
+    });
+
+    // Filtro de data exclusivo da página de Transações
+    if (fullTransactions && month) {
+        filtered = filtered.filter(transaction => transaction.date.startsWith(month));
+    }
 
     // Aplica o filtro de Tipo
-    if(type !== 'all') {
+    if (type !== 'all') {
         filtered = filtered.filter(transaction => transaction.type === type);
     }
 
     // Aplica o filtro de Busca por Descrição
-    if(search.trim() !== '') {
-        filtered = filtered.filter(transaction => 
+    if (search.trim() !== '') {
+        filtered = filtered.filter(transaction =>
             transaction.description.toLowerCase().includes(search.toLowerCase())
         );
     }
 
-    // Na página principal (Visão Geral), limita às 10 últimas
-    if(dashboardTransactions) {
+    // Na página principal (Visão Geral), limita às 10 últimas adicionadas
+    if (dashboardTransactions) {
         filtered = filtered.slice(0, 10);
     }
 
     // Se a lista filtrada for vazia (ou sem dados originais), mostra o Estado Vazio
-    if(filtered.length === 0) {
+    if (filtered.length === 0) {
         const row = document.createElement('div');
         row.className = 'empty-list-item';
         row.textContent = 'Nenhuma transação encontrada';
@@ -130,7 +150,7 @@ function renderTransactions(type = 'all', search = '') {
 
     // Renderiza apenas as transações válidas
     filtered.forEach(transaction => {
-        if(fullTransactions && currentDate !== transaction.date) {
+        if (fullTransactions && currentDate !== transaction.date) {
             currentDate = transaction.date;
             const listTitle = document.createElement('h2');
             listTitle.textContent = formatReadableDate(transaction.date);
@@ -185,7 +205,7 @@ function renderTransactions(type = 'all', search = '') {
         row.append(dateCell, categoryCell, typeCell, descriptionCell, valueCell);
 
         // Ações de editar e excluir na página de transações
-        if(fullTransactions) {
+        if (fullTransactions) {
             row.className = 'transaction-item with-actions';
 
             // Botão Editar
@@ -222,7 +242,7 @@ function renderTransactions(type = 'all', search = '') {
 }
 
 function renderCategories(selectedCategory = null) {
-    if(!categorySelect || !typeSelect) return;
+    if (!categorySelect || !typeSelect) return;
 
     categorySelect.innerHTML = '';
 
@@ -232,7 +252,7 @@ function renderCategories(selectedCategory = null) {
     firstOption.disabled = true;
     firstOption.textContent = 'Selecione uma categoria...';
 
-    if(!selectedCategory || !availableCategories.some(category => category.name === selectedCategory)) {
+    if (!selectedCategory || !availableCategories.some(category => category.name === selectedCategory)) {
         firstOption.selected = true;
     }
 
@@ -243,7 +263,7 @@ function renderCategories(selectedCategory = null) {
         option.value = category.name;
         option.textContent = category.name;
 
-        if(selectedCategory && category.name === selectedCategory) {
+        if (selectedCategory && category.name === selectedCategory) {
             option.selected = true;
         }
 
@@ -255,7 +275,7 @@ function renderCategoriesPage() {
     const expenseContainer = document.getElementById('expense-categories');
     const incomeContainer = document.getElementById('income-categories');
 
-    if(!expenseContainer || !incomeContainer) return;
+    if (!expenseContainer || !incomeContainer) return;
 
     expenseContainer.innerHTML = '';
     incomeContainer.innerHTML = '';
@@ -275,7 +295,7 @@ function renderCategoriesPage() {
 
         card.append(icon, name);
 
-        if(category.user_id !== null) {
+        if (category.user_id !== null) {
             const editIcon = document.createElement('i');
             editIcon.className = 'fa-solid fa-pencil';
             editIcon.style.cssText = 'position:absolute;top:8px;right:8px;opacity:0;transition:opacity 0.2s ease;pointer-events:none;font-size:0.75rem;';
@@ -285,7 +305,7 @@ function renderCategoriesPage() {
             card.addEventListener('mouseleave', () => editIcon.style.opacity = '0');
         }
 
-        if(category.type === 'expense') {
+        if (category.type === 'expense') {
             expenseContainer.append(card);
         } else {
             incomeContainer.append(card);
@@ -294,19 +314,146 @@ function renderCategoriesPage() {
 }
 
 function updateCards() {
-    if(!balanceCard || !incomeCard || !expenseCard) return;
+    if (!balanceCard || !incomeCard || !expenseCard) return;
 
     let totalIncome = 0;
     let totalExpense = 0;
 
     transactions.forEach(transaction => {
-        if(transaction.type === 'income') totalIncome += transaction.value;
-        if(transaction.type === 'expense') totalExpense += transaction.value;
+        if (transaction.type === 'income') totalIncome += transaction.value;
+        if (transaction.type === 'expense') totalExpense += transaction.value;
     });
 
     balanceCard.textContent = formatCurrency(totalIncome - totalExpense);
     incomeCard.textContent = `+ ${formatCurrency(totalIncome)}`;
     expenseCard.textContent = `- ${formatCurrency(totalExpense)}`;
+}
+
+function renderExpensesChart() {
+    if (!expensesChartCanvas || !expensesBreakdown) return;
+
+    const expenses = transactions.filter(t => t.type === 'expense');
+
+    if (expenses.length === 0) {
+        if (expensesAnalyticsContent) expensesAnalyticsContent.style.display = 'none';
+        if (expensesChartEmpty) expensesChartEmpty.style.display = 'flex';
+        if (expensesChartInstance) {
+            expensesChartInstance.destroy();
+            expensesChartInstance = null;
+        }
+        return;
+    }
+
+    if (expensesAnalyticsContent) expensesAnalyticsContent.style.display = 'grid';
+    if (expensesChartEmpty) expensesChartEmpty.style.display = 'none';
+
+    const totalsByCategory = {};
+    let totalExpenses = 0;
+
+    expenses.forEach(item => {
+        totalsByCategory[item.category] = (totalsByCategory[item.category] || 0) + item.value;
+        totalExpenses += item.value;
+    });
+
+    const sortedCategories = Object.entries(totalsByCategory)
+        .map(([name, total]) => {
+            const matched = categories.find(cat => cat.name === name && cat.type === 'expense');
+            return {
+                name,
+                total,
+                color: matched?.color || '#10b981',
+                icon: matched?.icon || 'fa-tag',
+                percent: totalExpenses > 0 ? ((total / totalExpenses) * 100).toFixed(1) : '0.0'
+            };
+        })
+        .sort((a, b) => b.total - a.total);
+
+    // Renderiza lista detalhada ao lado do gráfico
+    expensesBreakdown.innerHTML = '';
+    sortedCategories.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'breakdown-item';
+
+        const top = document.createElement('div');
+        top.className = 'breakdown-top';
+
+        const label = document.createElement('div');
+        label.className = 'breakdown-label';
+
+        const dot = document.createElement('span');
+        dot.className = 'breakdown-dot';
+        dot.style.backgroundColor = item.color;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = item.name;
+
+        label.append(dot, nameSpan);
+
+        const values = document.createElement('div');
+        values.className = 'breakdown-values';
+
+        const amountSpan = document.createElement('span');
+        amountSpan.textContent = formatCurrency(item.total);
+
+        const percentSpan = document.createElement('span');
+        percentSpan.className = 'breakdown-percent';
+        percentSpan.textContent = `${item.percent}%`;
+
+        values.append(amountSpan, percentSpan);
+        top.append(label, values);
+
+        const barBg = document.createElement('div');
+        barBg.className = 'breakdown-bar-bg';
+
+        const barFill = document.createElement('div');
+        barFill.className = 'breakdown-bar-fill';
+        barFill.style.width = `${item.percent}%`;
+        barFill.style.backgroundColor = item.color;
+
+        barBg.append(barFill);
+        row.append(top, barBg);
+        expensesBreakdown.append(row);
+    });
+
+    // Renderiza gráfico Doughnut com Chart.js
+    if (typeof Chart !== 'undefined') {
+        if (expensesChartInstance) {
+            expensesChartInstance.destroy();
+        }
+
+        expensesChartInstance = new Chart(expensesChartCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: sortedCategories.map(c => c.name),
+                datasets: [{
+                    data: sortedCategories.map(c => c.total),
+                    backgroundColor: sortedCategories.map(c => c.color),
+                    borderColor: '#0b1322',
+                    borderWidth: 3,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleColor: '#e2e8f0',
+                        bodyColor: '#34d399',
+                        borderColor: 'rgba(52, 211, 153, 0.35)',
+                        borderWidth: 1,
+                        padding: 10,
+                        callbacks: {
+                            label: (context) => ` ${formatCurrency(context.parsed)}`
+                        }
+                    }
+                }
+            }
+        });
+    }
 }
 
 async function loadTransactions() {
@@ -318,7 +465,8 @@ async function loadTransactions() {
 
     transactions = await response.json();
     updateCards();
-    renderTransactions(selectedTypeButton, searchTextContent);
+    renderExpensesChart();
+    renderTransactions(selectedTypeButton, searchTextContent, selectedMonth);
 }
 
 async function loadCategories() {
@@ -336,7 +484,7 @@ async function loadCategories() {
 /* ==========================================================================
    3. Operações de Adição, Edição e Exclusão
    ========================================================================== */
-if(transactionForm) {
+if (transactionForm) {
     transactionForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -346,7 +494,7 @@ if(transactionForm) {
         const value = Number.parseFloat(valueInput?.value || '0');
         const type = typeSelect?.value || '';
 
-        if(!description || !date || !category || !type || Number.isNaN(value) || value <= 0) {
+        if (!description || !date || !category || !type || Number.isNaN(value) || value <= 0) {
             alert('Preencha todos os campos corretamente antes de salvar a transação.');
             return;
         }
@@ -394,14 +542,14 @@ if(transactionForm) {
     });
 }
 
-if(categoryForm) {
+if (categoryForm) {
     categoryForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const name = categoryNameInput?.value?.trim() || '';
         const type = categoryTypeSelect?.value || '';
 
-        if(!name || !type) {
+        if (!name || !type) {
             alert('Preencha todos os campos corretamente antes de salvar a categoria.');
             return;
         }
@@ -445,27 +593,27 @@ if(categoryForm) {
 }
 
 function showTransactionForm() {
-    if(transactionForm) transactionForm.style.display = 'block';
+    if (transactionForm) transactionForm.style.display = 'block';
     const deleteConfirmation = document.querySelector('.delete-confirmation');
-    if(deleteConfirmation) deleteConfirmation.style.display = 'none';
+    if (deleteConfirmation) deleteConfirmation.style.display = 'none';
 }
 
 function showCategoryForm() {
-    if(categoryForm) categoryForm.style.display = 'block';
-    if(categoryDeleteButton) categoryDeleteButton.style.display = 'none';
+    if (categoryForm) categoryForm.style.display = 'block';
+    if (categoryDeleteButton) categoryDeleteButton.style.display = 'none';
 }
 
 function ensureDeleteConfirmation() {
-    if(!modalOverlay) return null;
+    if (!modalOverlay) return null;
 
     let deleteConfirmation = document.querySelector('.delete-confirmation');
 
-    if(deleteConfirmation) {
-        if(modalTitle) modalTitle.textContent = 'Confirmar exclusão';
+    if (deleteConfirmation) {
+        if (modalTitle) modalTitle.textContent = 'Confirmar exclusão';
         modalOverlay.classList.add('active');
 
         const message = deleteConfirmation.querySelector('p');
-        if(message) {
+        if (message) {
             message.textContent = pendingDeleteTransactionId !== null
                 ? 'Deseja realmente excluir esta transação?'
                 : 'Deseja realmente excluir esta categoria?';
@@ -502,15 +650,15 @@ function ensureDeleteConfirmation() {
             || modalOverlay.querySelector('.modal-card')
             || modalOverlay;
 
-        if(modalTitle) {
+        if (modalTitle) {
             modalTitle.textContent = 'Confirmar exclusão';
         }
 
-        if(modalOverlay) {
+        if (modalOverlay) {
             modalOverlay.classList.add('active');
         }
 
-        if(deleteConfirmation.parentElement !== modalContent) {
+        if (deleteConfirmation.parentElement !== modalContent) {
             modalContent.appendChild(deleteConfirmation);
         }
 
@@ -519,11 +667,11 @@ function ensureDeleteConfirmation() {
         });
 
         deleteConfirmation.querySelector('.btn-confirm-delete').addEventListener('click', async () => {
-            if(pendingDeleteTransactionId === null && pendingDeleteCategoryId === null) return;
+            if (pendingDeleteTransactionId === null && pendingDeleteCategoryId === null) return;
 
-            if(pendingDeleteTransactionId)
+            if (pendingDeleteTransactionId)
                 await deleteTransaction(pendingDeleteTransactionId);
-            else if(pendingDeleteCategoryId)
+            else if (pendingDeleteCategoryId)
                 await deleteCategory(pendingDeleteCategoryId);
 
             closeModal();
@@ -538,7 +686,7 @@ function openEditModal(transaction) {
     pendingDeleteTransactionId = null;
     showTransactionForm();
 
-    if(modalTitle) modalTitle.textContent = 'Editar Transação';
+    if (modalTitle) modalTitle.textContent = 'Editar Transação';
 
     descriptionInput.value = transaction.description;
     valueInput.value = transaction.value;
@@ -546,11 +694,11 @@ function openEditModal(transaction) {
     dateInput.value = transaction.date;
     renderCategories(transaction.category);
 
-    if(modalOverlay) modalOverlay.classList.add('active');
+    if (modalOverlay) modalOverlay.classList.add('active');
 }
 
 function openCategoryModal(category) {
-    if(category.user_id === null) {
+    if (category.user_id === null) {
         alert('Categorias padrão não podem ser editadas ou removidas.');
         return;
     }
@@ -558,7 +706,7 @@ function openCategoryModal(category) {
     editingCategoryId = category.id;
     showCategoryForm();
 
-    if(modalTitle) modalTitle.textContent = 'Editar Categoria';
+    if (modalTitle) modalTitle.textContent = 'Editar Categoria';
 
     categoryNameInput.value = category.name;
     categoryTypeSelect.value = category.type;
@@ -569,12 +717,12 @@ function openCategoryModal(category) {
     categoryDeleteButton.onclick = () => {
         pendingDeleteCategoryId = category.id;
         pendingDeleteTransactionId = null;
-        if(categoryForm) categoryForm.style.display = 'none';
+        if (categoryForm) categoryForm.style.display = 'none';
         const deleteConfirmation = ensureDeleteConfirmation();
-        if(deleteConfirmation) deleteConfirmation.style.display = 'block';
+        if (deleteConfirmation) deleteConfirmation.style.display = 'block';
     };
 
-    if(modalOverlay) modalOverlay.classList.add('active');
+    if (modalOverlay) modalOverlay.classList.add('active');
 }
 
 function openDeleteModal(id) {
@@ -582,18 +730,18 @@ function openDeleteModal(id) {
     pendingDeleteCategoryId = null;
     editingTransactionId = null;
 
-    if(transactionForm) transactionForm.style.display = 'none';
+    if (transactionForm) transactionForm.style.display = 'none';
 
-    if(modalTitle) modalTitle.textContent = 'Confirmar exclusão';
+    if (modalTitle) modalTitle.textContent = 'Confirmar exclusão';
 
     const deleteConfirmation = ensureDeleteConfirmation();
-    if(deleteConfirmation) {
+    if (deleteConfirmation) {
         const message = deleteConfirmation.querySelector('p');
-        if(message) message.textContent = 'Deseja realmente excluir esta transação?';
+        if (message) message.textContent = 'Deseja realmente excluir esta transação?';
         deleteConfirmation.style.display = 'block';
     }
 
-    if(modalOverlay) modalOverlay.classList.add('active');
+    if (modalOverlay) modalOverlay.classList.add('active');
 }
 
 async function deleteTransaction(id) {
@@ -726,7 +874,7 @@ function initCompactMenu() {
     const btnMenu = document.querySelector('.btn-menu');
     const nav = document.querySelector('.nav');
 
-    if(!btnMenu || !nav) return;
+    if (!btnMenu || !nav) return;
 
     const btnMenuIcon = btnMenu.querySelector('i');
 
@@ -737,7 +885,7 @@ function initCompactMenu() {
     });
 
     document.addEventListener('click', (event) => {
-        if(!nav.contains(event.target) && !btnMenu.contains(event.target) && nav.classList.contains('active')) {
+        if (!nav.contains(event.target) && !btnMenu.contains(event.target) && nav.classList.contains('active')) {
             nav.classList.remove('active');
             toggleMenuIcon(btnMenuIcon, false);
         }
@@ -745,7 +893,7 @@ function initCompactMenu() {
 }
 
 function toggleMenuIcon(iconElement, isActive) {
-    if(!iconElement) return;
+    if (!iconElement) return;
     iconElement.className = isActive ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
 }
 
@@ -753,20 +901,20 @@ function initModal() {
     const openBtn = document.getElementById('open-modal-btn');
     const closeBtn = document.getElementById('close-modal-btn');
     
-    if(!modalOverlay) return;
+    if (!modalOverlay) return;
     
-    if(openBtn) {
+    if (openBtn) {
         openBtn.addEventListener('click', () => {
             editingTransactionId = null;
             pendingDeleteTransactionId = null;
             showTransactionForm();
             showCategoryForm();
-            if(modalTitle) modalTitle.textContent = (transactionForm) ? 'Nova Transação' : 'Nova Categoria';
-            if(transactionForm) transactionForm.reset();
-            if(categoryForm) categoryForm.reset();
+            if (modalTitle) modalTitle.textContent = (transactionForm) ? 'Nova Transação' : 'Nova Categoria';
+            if (transactionForm) transactionForm.reset();
+            if (categoryForm) categoryForm.reset();
 
             // Define a data de hoje como padrão (formato YYYY-MM-DD)
-            if(dateInput) {
+            if (dateInput) {
                 dateInput.value = new Date().toISOString().split('T')[0];
             }
 
@@ -776,43 +924,43 @@ function initModal() {
         });
     }
 
-    if(closeBtn) {
+    if (closeBtn) {
         closeBtn.addEventListener('click', closeModal);
     }
     
     // Fecha o modal ao clicar fora
     modalOverlay.addEventListener('click', (event) => {
-        if(event.target === modalOverlay) closeModal();
+        if (event.target === modalOverlay) closeModal();
     });
 
     // Fecha o modal ao pressionar a tecla ESC
     document.addEventListener('keydown', (event) => {
-        if(event.key === 'Escape' && modalOverlay.classList.contains('active')) {
+        if (event.key === 'Escape' && modalOverlay.classList.contains('active')) {
             closeModal();
         }
     });
 }
 
 function closeModal() {
-    if(modalOverlay) modalOverlay.classList.remove('active');
-    if(transactionForm) {
+    if (modalOverlay) modalOverlay.classList.remove('active');
+    if (transactionForm) {
         transactionForm.reset();
         transactionForm.style.display = 'block';
     }
 
-    if(categoryForm) {
+    if (categoryForm) {
         categoryForm.reset();
         categoryForm.style.display = 'block';
     }
 
-    if(categoryDeleteButton) categoryDeleteButton.style.display = 'none';
+    if (categoryDeleteButton) categoryDeleteButton.style.display = 'none';
 
-    if(categorySelect) {
+    if (categorySelect) {
         categorySelect.innerHTML = '';
     }
 
     const deleteConfirmation = document.querySelector('.delete-confirmation');
-    if(deleteConfirmation) deleteConfirmation.style.display = 'none';
+    if (deleteConfirmation) deleteConfirmation.style.display = 'none';
 
     editingTransactionId = null;
     editingCategoryId = null;
@@ -824,7 +972,7 @@ function closeModal() {
 }
 
 function initTypeSelection() {
-    if(!allTypeButton || !incomeTypeButton || !expenseTypeButton)
+    if (!allTypeButton || !incomeTypeButton || !expenseTypeButton)
         return;
 
     allTypeButton.onclick = () => {
@@ -845,7 +993,7 @@ function initTypeSelection() {
 }
 
 function updateTypeSelection() {
-    if(!allTypeButton || !incomeTypeButton || !expenseTypeButton)
+    if (!allTypeButton || !incomeTypeButton || !expenseTypeButton)
         return;
 
     allTypeButton.classList.remove('active');
@@ -860,7 +1008,7 @@ function updateTypeSelection() {
 }
 
 function initSearchBar() {
-    if(!searchInput)
+    if (!searchInput)
         return;
 
     searchInput.addEventListener('input', (event) => {
@@ -869,8 +1017,29 @@ function initSearchBar() {
     })
 }
 
+function initDateFilter() {
+    if (!monthFilterInput) return;
+
+    monthFilterInput.addEventListener('change', (event) => {
+        selectedMonth = event.target.value;
+        if (clearMonthButton) {
+            clearMonthButton.style.display = selectedMonth ? 'inline-flex' : 'none';
+        }
+        renderTransactions(selectedTypeButton, searchTextContent, selectedMonth);
+    });
+
+    if (clearMonthButton) {
+        clearMonthButton.addEventListener('click', () => {
+            selectedMonth = '';
+            monthFilterInput.value = '';
+            clearMonthButton.style.display = 'none';
+            renderTransactions(selectedTypeButton, searchTextContent, selectedMonth);
+        });
+    }
+}
+
 function renderCategoryPickers() {
-    if(categoryIconPicker) {
+    if (categoryIconPicker) {
         categoryIconPicker.innerHTML = '';
 
         categoryIcons.forEach(icon => {
@@ -892,7 +1061,7 @@ function renderCategoryPickers() {
         });
     }
 
-    if(categoryColorPicker) {
+    if (categoryColorPicker) {
         categoryColorPicker.innerHTML = '';
 
         categoryColors.forEach(color => {
@@ -916,13 +1085,13 @@ function renderCategoryPickers() {
    5. Formatadores
    ========================================================================== */
 function formatDate(dateString) {
-    if(!dateString) return '';
+    if (!dateString) return '';
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
 }
 
 function formatReadableDate(dateString) {
-    if(!dateString) return '';
+    if (!dateString) return '';
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day);
     const today = new Date();
@@ -931,10 +1100,10 @@ function formatReadableDate(dateString) {
     const yesterday = new Date(todayDate);
     yesterday.setDate(todayDate.getDate() - 1);
 
-    if(date.getTime() === todayDate.getTime())
+    if (date.getTime() === todayDate.getTime())
         return 'Hoje';
 
-    if(date.getTime() === yesterday.getTime())
+    if (date.getTime() === yesterday.getTime())
         return 'Ontem';
 
     const dayNames = [
@@ -955,7 +1124,7 @@ function formatReadableDate(dateString) {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    if(date >= startOfWeek && date <= endOfWeek)
+    if (date >= startOfWeek && date <= endOfWeek)
         return dayNames[date.getDay()];
 
     const abbreviatedMonths = [
@@ -1062,9 +1231,10 @@ async function init() {
     initModal();
     initTypeSelection();
     initSearchBar();
+    initDateFilter();
     renderCategoryPickers();
 
-    if(!isPublicPage()) {
+    if (!isPublicPage()) {
         try {
             await loadCategories();
             await loadTransactions();

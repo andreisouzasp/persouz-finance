@@ -6,68 +6,74 @@
    3. Classes Utilitárias Globais
    4. Cabeçalho & Navegação
    5. Layout Principal & Cards de Resumo
-   6. Blocos de Conteúdo & Listas de Transações
-   7. Botões
-   8. Páginas de Autenticação (Login e Register)
-   9. Página de Categorias
-   10. Rodapé
-   11. Janela Modal
-   12. Formulário de Categorias
-   13. Responsividade (Media Queries)
+   6. Análise Gráfica (Dashboard)
+   7. Blocos de Conteúdo & Listas de Transações
+   8. Botões e Filtros
+   9. Páginas de Autenticação (Login e Register)
+   10. Página de Categorias
+   11. Rodapé
+   12. Janela Modal
+   13. Formulário de Categorias
+   14. Responsividade (Media Queries)
    ========================================================================== */
 
 /* ==========================================================================
    1. Variáveis Globais e Configurações de Tema
    ========================================================================== */
 :root {
-    /* Identidade Visual */
-    --persouz-color: #8b5cf6;
-    --persouz-secondary: #c084fc;
-    --persouz-tertiary: #a78bfa;
+    /* Identidade Visual (Verde Esmeralda SaaS) */
+    --persouz-color: #10b981;
+    --persouz-secondary: #34d399;
+    --persouz-tertiary: #22c55e;
+    --persouz-deep: #059669;
 
     /* Textos */
     --text-primary: #e2e8f0;
     --text-secondary: #94a3b8;
     --text-inverse: #ffffff;
-    --text-white-subtle: rgba(255, 255, 255, 0.88);
+    --text-white-subtle: rgba(255, 255, 255, 0.9);
 
     /* Backgrounds e Superfícies */
-    --bg-color: #020817;
-    --bg-gradient: #111827;
-    --bg-gradient-2: #0b1120;
-    --bg-surface: #0f172a;
-    --bg-panel: rgba(15, 23, 42, 0.82);
-    --bg-header: rgba(9, 13, 26, 0.72);
-    --bg-nav: rgba(15, 23, 42, 0.72);
-    --bg-input: rgba(15, 23, 42, 0.8);
-    --bg-overlay: rgba(2, 6, 23, 0.8);
+    --bg-color: #030712;
+    --bg-gradient: #09111e;
+    --bg-gradient-2: #050b14;
+    --bg-surface: #0b1322;
+    --bg-panel: rgba(11, 19, 34, 0.84);
+    --bg-header: rgba(5, 10, 20, 0.78);
+    --bg-nav: rgba(15, 23, 42, 0.75);
+    --bg-input: rgba(15, 23, 42, 0.85);
+    --bg-overlay: rgba(2, 6, 23, 0.82);
+
+    /* Grade SaaS de Fundo */
+    --grid-line-color: rgba(148, 163, 184, 0.055);
+    --grid-size: 40px;
 
     /* Efeitos de Iluminação / Glows */
-    --glow-purple-light: rgba(168, 85, 247, 0.22);
-    --glow-purple-accent: rgba(168, 85, 247, 0.35);
-    --glow-blue-light: rgba(56, 189, 248, 0.14);
-    --glow-spot-primary: rgba(139, 92, 246, 0.32);
-    --glow-spot-primary-soft: rgba(139, 92, 246, 0.08);
-    --glow-spot-secondary: rgba(192, 132, 252, 0.22);
-    --glow-spot-secondary-soft: rgba(167, 139, 250, 0.05);
+    --glow-emerald-light: rgba(16, 185, 129, 0.16);
+    --glow-emerald-accent: rgba(16, 185, 129, 0.35);
+    --glow-teal-light: rgba(20, 184, 166, 0.12);
+    --glow-spot-primary: rgba(16, 185, 129, 0.24);
+    --glow-spot-primary-soft: rgba(16, 185, 129, 0.06);
+    --glow-spot-secondary: rgba(34, 197, 94, 0.18);
+    --glow-spot-secondary-soft: rgba(52, 211, 153, 0.04);
 
     /* Bordas e Divisores */
-    --border-color: rgba(148, 163, 184, 0.18);
-    --border-subtle: rgba(148, 163, 184, 0.12);
-    --border-active: rgba(192, 132, 252, 0.38);
-    --surface-border: rgba(255, 255, 255, 0.08);
-    --border-balance-card: rgba(196, 181, 253, 0.5);
+    --border-color: rgba(148, 163, 184, 0.16);
+    --border-subtle: rgba(148, 163, 184, 0.11);
+    --border-active: rgba(52, 211, 153, 0.42);
+    --surface-border: rgba(255, 255, 255, 0.07);
+    --border-balance-card: rgba(110, 231, 183, 0.45);
 
     /* Anel de Foco (Inputs) */
-    --focus-ring: rgba(139, 92, 246, 0.2);
+    --focus-ring: rgba(16, 185, 129, 0.22);
 
     /* Status Cores & Badges */
     --income-color: #34d399;
-    --income-bg: rgba(52, 211, 153, 0.15);
+    --income-bg: rgba(52, 211, 153, 0.14);
     --income-border: rgba(52, 211, 153, 0.3);
 
     --expense-color: #f87171;
-    --expense-bg: rgba(248, 113, 113, 0.15);
+    --expense-bg: rgba(248, 113, 113, 0.14);
     --expense-border: rgba(248, 113, 113, 0.3);
     
     /* Cores de Ação (Botões Edit/Delete) */
@@ -84,20 +90,20 @@
     --edit-border-hover: rgba(234, 179, 8, 0.8);
 
     /* Sombras (Shadows) */
-    --shadow-sm: 0 12px 32px rgba(2, 6, 23, 0.28);
-    --shadow-md: 0 16px 30px rgba(2, 8, 23, 0.28);
-    --shadow-lg: 0 18px 38px rgba(2, 8, 23, 0.35);
-    --shadow-btn-primary: 0 18px 28px rgba(120, 58, 237, 0.30);
-    --shadow-balance-card: 0 20px 38px rgba(133, 55, 206, 0.32);
-    --shadow-nav-active: 0 10px 25px rgba(139, 92, 246, 0.18);
+    --shadow-sm: 0 12px 32px rgba(2, 6, 23, 0.32);
+    --shadow-md: 0 16px 30px rgba(2, 8, 23, 0.32);
+    --shadow-lg: 0 18px 38px rgba(2, 8, 23, 0.38);
+    --shadow-btn-primary: 0 14px 26px rgba(5, 150, 105, 0.32);
+    --shadow-balance-card: 0 20px 38px rgba(5, 150, 105, 0.28);
+    --shadow-nav-active: 0 8px 22px rgba(16, 185, 129, 0.18);
 
     /* Gradientes */
-    --gradient-primary: linear-gradient(135deg, var(--persouz-color) 0%, var(--persouz-secondary) 100%);
-    --gradient-surface: linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.7));
-    --gradient-card: linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.7));
-    --gradient-nav: linear-gradient(180deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
-    --gradient-nav-active: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(192, 132, 252, 0.14));
-    --gradient-transaction: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.02) 100%);
+    --gradient-primary: linear-gradient(135deg, var(--persouz-deep) 0%, var(--persouz-color) 55%, var(--persouz-tertiary) 100%);
+    --gradient-surface: linear-gradient(180deg, rgba(11, 19, 34, 0.9), rgba(11, 19, 34, 0.74));
+    --gradient-card: linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(11, 19, 34, 0.76));
+    --gradient-nav: linear-gradient(180deg, rgba(30, 41, 59, 0.88), rgba(15, 23, 42, 0.88));
+    --gradient-nav-active: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.12));
+    --gradient-transaction: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(16, 185, 129, 0.015) 100%);
     --gradient-user-icon: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.92));
 
     /* Espaçamentos e Bordas */
@@ -110,7 +116,7 @@
     --radius-pill: 999px;
 
     /* Efeitos de Blur (Glassmorphism) */
-    --blur-soft: 10px;
+    --blur-soft: 12px;
     --blur-panel: 18px;
 
     /* Transições */
@@ -135,10 +141,20 @@ html {
 body {
     position: relative;
     color: var(--text-primary);
-    background:
-        radial-gradient(circle at top left, var(--glow-purple-light), transparent 28%),
-        radial-gradient(circle at bottom right, var(--glow-blue-light), transparent 24%),
-        linear-gradient(135deg, var(--bg-color) 0%, var(--bg-gradient) 42%, var(--bg-gradient-2) 100%);
+    background-color: var(--bg-color);
+    background-image:
+        linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px),
+        radial-gradient(circle at top left, var(--glow-emerald-light), transparent 32%),
+        radial-gradient(circle at bottom right, var(--glow-teal-light), transparent 28%),
+        linear-gradient(135deg, var(--bg-color) 0%, var(--bg-gradient) 45%, var(--bg-gradient-2) 100%);
+    background-size:
+        var(--grid-size) var(--grid-size),
+        var(--grid-size) var(--grid-size),
+        100% 100%,
+        100% 100%,
+        100% 100%;
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -156,7 +172,7 @@ body::after {
     pointer-events: none;
     z-index: -1;
     will-change: transform, opacity;
-    animation: purpleBreathing 14s ease-in-out infinite alternate;
+    animation: emeraldBreathing 14s ease-in-out infinite alternate;
 }
 
 body::before {
@@ -182,7 +198,7 @@ body::after {
     animation-delay: -7s;
 }
 
-@keyframes purpleBreathing {
+@keyframes emeraldBreathing {
     0% {
         transform: translate3d(0, 0, 0) scale(1);
         opacity: 0.75;
@@ -198,7 +214,7 @@ body::after {
 }
 
 ::selection {
-    background: var(--glow-purple-accent);
+    background: var(--glow-emerald-accent);
     color: var(--text-inverse);
 }
 
@@ -215,8 +231,8 @@ body::after {
 .modal-close,
 .footer,
 i {
-    -webkit-user-select: none; /* Safari e navegadores baseados em WebKit */
-    user-select: none;         /* Padrão CSS3 */
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* ==========================================================================
@@ -260,6 +276,7 @@ i {
     width: 2.2rem;
     height: 2.2rem;
     object-fit: contain;
+    border-radius: 8px;
 }
 
 .logo-text {
@@ -375,6 +392,7 @@ i {
     font-size: 0.9rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .card-value {
@@ -393,7 +411,120 @@ i {
 #balance-card .card-header { color: var(--text-white-subtle); }
 
 /* ==========================================================================
-   6. Blocos de Conteúdo & Listas de Transações
+   6. Análise Gráfica (Dashboard)
+   ========================================================================== */
+.analytics-section {
+    padding: 1.35rem 1.3rem 1.3rem;
+}
+
+.analytics-section .section-header-inline {
+    padding-top: 1rem;
+}
+
+.section-header-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.section-header-inline h3 {
+    margin: 0 !important;
+}
+
+.section-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.5rem 0;
+}
+
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 240px;
+    height: 240px;
+    margin: 0 auto;
+}
+
+.category-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.breakdown-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-subtle);
+}
+
+.breakdown-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.breakdown-label {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--text-primary);
+}
+
+.breakdown-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.breakdown-values {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.breakdown-percent {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(148, 163, 184, 0.12);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-pill);
+}
+
+.breakdown-bar-bg {
+    width: 100%;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: rgba(148, 163, 184, 0.12);
+    overflow: hidden;
+}
+
+.breakdown-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    transition: width 0.4s ease;
+}
+
+/* ==========================================================================
+   7. Blocos de Conteúdo & Listas de Transações
    ========================================================================== */
 .content-block {
     background: var(--gradient-surface);
@@ -428,7 +559,7 @@ i {
     font-size: 0.9rem;
     font-weight: 600;
     transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
-    border: 1px solid transparent;
+    border: 1px solid var(--border-subtle);
 }
 
 .empty-list-item {
@@ -458,8 +589,8 @@ i {
 
 #full-transactions .transaction-item:hover {
     transform: translateY(-2px);
-    border-color: var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    border-color: var(--border-active);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
 }
 
 .badge {
@@ -521,7 +652,7 @@ i {
 }
 
 /* ==========================================================================
-   7. Botões
+   8. Botões e Filtros
    ========================================================================== */
 .btn-primary {
     width: 100%;
@@ -538,7 +669,7 @@ i {
 }
 
 .btn-primary:hover {
-    filter: brightness(1.09);
+    filter: brightness(1.08);
     transform: translateY(-2px);
 }
 
@@ -584,9 +715,9 @@ i {
 
 .full-transactions-header {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: auto 1fr auto auto;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .btn-small {
@@ -611,7 +742,7 @@ i {
 
 .btn-type:hover {
     color: var(--text-primary);
-    background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(192,132,252,0.06));
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(52, 211, 153, 0.06));
     border-color: var(--border-active);
     transform: translateY(-2px);
 }
@@ -629,41 +760,65 @@ i {
     gap: 0.5rem;
 }
 
-.search-block {
+.search-block,
+.date-filter-block {
     display: flex;
     align-items: center;
     gap: 0.6rem;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
-    padding: 0.35rem 0.6rem;
+    padding: 0.42rem 0.75rem;
     border-radius: 12px;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.search-block i {
+.search-block i,
+.date-filter-block i {
     color: var(--text-secondary);
     font-size: 0.95rem;
 }
 
-.search-input {
+.search-input,
+.date-filter-input {
     background: transparent;
     border: none;
     color: var(--text-primary);
     outline: none;
     width: 100%;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    color-scheme: dark;
 }
 
 .search-input::placeholder {
     color: var(--text-secondary);
 }
 
-.search-input:focus + .search-block, .search-block:focus-within {
-    box-shadow: 0 0 0 4px var(--focus-ring);
+.search-block:focus-within,
+.date-filter-block:focus-within {
+    box-shadow: 0 0 0 3px var(--focus-ring);
     border-color: var(--border-active);
 }
 
+.btn-clear-date {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem;
+    border-radius: 6px;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.btn-clear-date:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
 /* ==========================================================================
-   8. Páginas de Autenticação (Login e Register)
+   9. Páginas de Autenticação (Login e Register)
    ========================================================================== */
 .auth-body {
     justify-content: center;
@@ -725,6 +880,7 @@ i {
     color: var(--text-primary);
     font-size: 1rem;
     outline: none;
+    color-scheme: dark;
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -752,7 +908,7 @@ i {
 }
 
 /* ==========================================================================
-   9. Página de Categorias
+   10. Página de Categorias
    ========================================================================== */
 .categories-grid {
     display: grid;
@@ -790,7 +946,7 @@ i {
 .category-card:hover {
     transform: translateY(-4px);
     border-color: var(--cat-color);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.24);
 }
 
 .category-card:hover::before {
@@ -814,7 +970,7 @@ i {
 }
 
 /* ==========================================================================
-   10. Rodapé
+   11. Rodapé
    ========================================================================== */
 .footer {
     padding: 1.3rem;
@@ -830,7 +986,7 @@ i {
 }
 
 /* ==========================================================================
-   11. Janela Modal
+   12. Janela Modal
    ========================================================================== */
 .modal-overlay {
     position: fixed;
@@ -970,7 +1126,7 @@ i {
 }
 
 /* ==========================================================================
-   12. Formulário de Categorias
+   13. Formulário de Categorias
    ========================================================================== */
 .form-btns {
     display: flex;
@@ -1008,7 +1164,7 @@ i {
 .icon-picker-option.active {
     color: var(--persouz-secondary);
     border-color: var(--border-active);
-    background: rgba(45, 212, 191, 0.08);
+    background: rgba(16, 185, 129, 0.12);
     transform: translateY(-1px);
 }
 
@@ -1026,8 +1182,39 @@ i {
     box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 4px var(--picker-color);
 }
 
+#logout-btn,
+.compact-logout-btn {
+    width: 3rem;
+    height: 3rem;
+    min-width: 3rem;
+    min-height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-subtle);
+    background: rgba(30, 41, 59, 0.9);
+    color: #d1d5db;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-medium);
+}
+
+#logout-btn:hover,
+.compact-logout-btn:hover {
+    background: rgba(51, 65, 85, 0.95);
+    color: #ffffff;
+    border-color: rgba(209, 213, 219, 0.35);
+    transform: translateY(-1px);
+}
+
+.compact-actions,
+.compact-actions[aria-hidden="true"] {
+    display: none;
+}
+
 /* ==========================================================================
-   13. Responsividade (Media Queries)
+   14. Responsividade (Media Queries)
    ========================================================================== */
 @media (max-width: 900px) {
     .header .logo {
@@ -1072,6 +1259,22 @@ i {
     }
 
     .cards { grid-template-columns: 1fr; }
+
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-transactions-header {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "type add"
+            "search date";
+    }
+
+    .filter-type { grid-area: type; }
+    .full-transactions-header .btn-small { grid-area: add; }
+    .search-block { grid-area: search; }
+    .date-filter-block { grid-area: date; }
 
     .transaction-item {
         grid-template-columns: 1fr auto !important;
@@ -1125,25 +1328,22 @@ i {
 
 @media (max-width: 700px) {
     .full-transactions-header {
-        gap: 1rem;
-        grid-template-columns: 1fr auto;
+        gap: 0.85rem;
+        grid-template-columns: 1fr;
         grid-template-areas:
-            "type type"
-            "search add"
+            "type"
+            "search"
+            "date"
+            "add";
     }
 
     .filter-type {
         justify-content: center;
-        grid-area: type;
     }
 
-    .btn-add-transaction {
-        width: auto;
-        grid-area: add;
-    }
-
-    .search-block {
-        grid-area: search;
+    .full-transactions-header .btn-small {
+        width: 100%;
+        justify-self: stretch;
     }
 }
 
@@ -1158,7 +1358,7 @@ i {
         margin-bottom: 0;
     }
 
-    .btn-show-all {
+    .dashboard-transactions-header .btn-small {
         width: 100%;
         margin-top: 1rem;
     }
@@ -1188,41 +1388,4 @@ i {
 
 @media (prefers-reduced-motion: reduce) {
     body::before, body::after { animation: none; }
-}
-
-#logout-btn,
-.compact-logout-btn {
-    width: 3rem;
-    height: 3rem;
-    min-width: 3rem;
-    min-height: 3rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 1px solid var(--border-subtle);
-    background: #374151;
-    color: #d1d5db;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all var(--transition-medium);
-}
-
-#logout-btn:hover,
-.compact-logout-btn:hover {
-    background: #4b5563;
-    color: #ffffff;
-    border-color: rgba(209, 213, 219, 0.35);
-    transform: translateY(-1px);
-}
-
-.compact-actions,
-.compact-actions[aria-hidden="true"] {
-    display: none;
-}
-
-@media (max-width: 900px) {
-    .compact-actions {
-        display: flex;
-    }
 }
