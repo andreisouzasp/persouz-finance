@@ -13,7 +13,8 @@
 /* ==========================================================================
    1. Variáveis Globais e Seletores
    ========================================================================== */
-const apiBaseUrl = 'http://localhost:3000';
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const apiBaseUrl = isLocalhost ? 'http://localhost:3000' : 'https://persouz-finance-api.onrender.com';
 const balanceCard = document.querySelector('#balance-card .card-value');
 const incomeCard = document.querySelector('#income-card .card-value');
 const expenseCard = document.querySelector('#expense-card .card-value');
