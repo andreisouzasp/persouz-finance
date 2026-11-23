@@ -19,13 +19,22 @@
 
 ---
 
-## 📌 Sobre o Projeto
+## 🌐 Demonstração ao Vivo
 
-O **Persouz Finance** é uma aplicação Full Stack multiusuário focada em simplificar o controle financeiro diário de forma inteligente, segura e sem atritos. O projeto conta com arquitetura cliente-servidor completa, API REST em camadas tipada em TypeScript, autenticação via JWT com criptografia de senhas, visualização analítica com Chart.js e persistência relacional em PostgreSQL.
+- **Aplicação Web (Vercel):** [persouzfinance.vercel.app](https://persouzfinance.vercel.app)
+- **API REST (Render):** [persouz-finance-api.onrender.com](https://persouz-finance-api.onrender.com)
+
+> **Nota:** Como a API está hospedada no plano gratuito do Render, a primeira requisição após um período de inatividade pode levar cerca de 30 a 50 segundos para inicializar o servidor.
 
 ---
 
-## 🚀 Funcionalidades Atuais
+## 📌 Sobre o Projeto
+
+O **Persouz Finance** é uma aplicação Full Stack multiusuário focada em simplificar o controle financeiro diário de forma inteligente, segura e sem atritos. O projeto conta com arquitetura cliente-servidor completa, API REST em camadas tipada em TypeScript, autenticação via JWT com criptografia de senhas, visualização analítica com Chart.js e persistência relacional em PostgreSQL na nuvem.
+
+---
+
+## 🚀 Funcionalidades
 
 - 🔐 **Autenticação e Isolamento por Usuário:** Cadastro e login seguros com senhas criptografadas (`bcrypt`), geração de tokens `JWT`, middleware de proteção de rotas na API e guarda de sessão no front-end.
 - 📊 **Análise Visual de Despesas:** Gráfico interativo de rosca (*Doughnut Chart*) com **Chart.js** acompanhado de detalhamento percentual e barras de progresso por categoria no Dashboard.
@@ -39,7 +48,7 @@ O **Persouz Finance** é uma aplicação Full Stack multiusuário focada em simp
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Tecnologias & Infraestrutura
 
 ### **Front-end**
 - **HTML5:** Estruturação semântica, formulários acessíveis e atributos ARIA.
@@ -50,8 +59,13 @@ O **Persouz Finance** é uma aplicação Full Stack multiusuário focada em simp
 ### **Back-end**
 - **Node.js & Express:** Criação do servidor HTTP, middlewares de autenticação e roteamento REST organizado em camadas (`routes`, `controllers`, `repositories` e `middlewares`).
 - **TypeScript:** Tipagem estática, interfaces (`User`, `PublicUser`, `Transaction`, `Category`) e validação de contratos e payloads em runtime.
-- **PostgreSQL (`pg`):** Banco de dados relacional com pool de conexões configurado e consultas SQL parametrizadas.
+- **PostgreSQL (`pg`):** Banco de dados relacional com pool de conexões configurado, suporte a SSL e consultas SQL parametrizadas.
 - **Bcrypt & JSON Web Token (JWT):** Hashing seguro de senhas e autenticação stateless baseada em tokens.
+
+### **Deploy & Cloud**
+- **Vercel:** Hospedagem do front-end com deploy contínuo.
+- **Render:** Hospedagem da API Node.js/TypeScript.
+- **Neon:** Banco de dados PostgreSQL serverless em nuvem.
 
 ---
 
@@ -96,6 +110,7 @@ Abra a pasta `client/` utilizando uma extensão de servidor local (como o **Live
 - [x] **Autenticação:** Sistema seguro de Login e Cadastro (`login.html` e `register.html` com `bcrypt` e `JWT`).
 - [x] **Arquitetura em Camadas:** Refatoração do back-end em `routes`, `controllers`, `repositories` e `middlewares`.
 - [x] **Análise Mensal & Gráficos:** Filtros por período (*Mês/Ano*) e visualização de despesas por categoria com **Chart.js**.
+- [x] **Deploy em Nuvem:** Publicação completa na **Vercel**, **Render** e **Neon**.
 
 ---
 
