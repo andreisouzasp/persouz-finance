@@ -1,34 +1,34 @@
-import pg from 'pg';
+import { Pool } from 'pg';
 import dotenv from 'dotenv';
 
-const { Pool } = pg;
 dotenv.config();
 
-const {
-    DB_HOST,
-    DB_PORT,
-    DB_USER,
-    DB_PASSWORD,
-    DB_NAME
-} = process.env;
+const isProduction = Boolean(process.env.DATABASE_URL);
 
-if (!DB_HOST || !DB_PORT || !DB_USER || !DB_PASSWORD || !DB_NAME) {
-    throw new Error('Configuração do PostgreSQL incompleta. Verifique as variáveis DB_HOST, DB_PORT, DB_USER, DB_PASSWORD e DB_NAME.');
+if (!isProduction) {
+    const requiredEnvVars = ['DB_USER', 'DB_HOST', 'DB_NAME', 'DB_PASSWORD'];
+    const missingVars = requiredEnvVars.filter((key) => !process.env[key]);
+
+    if (missingVars.length > 0) {
+        throw new Error(`Variáveis de ambiente obrigatórias ausentes: ${missingVars.join(', ')}`);
+    }
 }
 
-const port = Number(DB_PORT);
-
-if (!Number.isInteger(port) || port <= 0) {
-    throw new Error('DB_PORT deve ser um número inteiro válido.');
-}
-
-export const pool = new Pool({
-    host: DB_HOST,
-    port,
-    user: DB_USER,
-    password: DB_PASSWORD,
-    database: DB_NAME,
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000
-});
+export const pool = isProduction
+    ? new Pool({
+          connectionString: process.env.DATABASE_URL,
+          ssl: { rejectUnauthorized: false },
+          max: 10,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 5000
+      })
+    : new Pool({
+          user: process.env.DB_USER,
+          host: process.env.DB_HOST,
+          database: process.env.DB_NAME,
+          password: process.env.DB_PASSWORD,
+          port: Number(process.env.DB_PORT) || 5432,
+          max: 10,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 5000
+      });
